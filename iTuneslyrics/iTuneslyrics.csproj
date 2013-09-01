@@ -10,12 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>iTuneslyrics</RootNamespace>
     <AssemblyName>iTuneslyrics</AssemblyName>
-    <ManifestCertificateThumbprint>098EEF28F2EFCDA876132CEC437715ADB9FDB415</ManifestCertificateThumbprint>
-    <ManifestKeyFile>iTuneslyrics_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>D888784530CDFC93C644C76ED4F9C5FCF3309E6B</ManifestCertificateThumbprint>
+    <ManifestKeyFile>key.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <TargetZone>LocalIntranet</TargetZone>
     <SignManifests>true</SignManifests>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
     <ApplicationIcon>Resources\iTunesHelper_APP_ICON.ico</ApplicationIcon>
     <StartupObject>
     </StartupObject>
@@ -26,16 +26,18 @@
     </UpgradeBackupLocation>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
-    <PublishUrl>E:\Publish\iTunesLyrics\</PublishUrl>
+    <PublishUrl>D:\Alejandro\Dropbox\Projects\GitHub\iTunesLyrics\Publish\</PublishUrl>
     <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://amd989.github.io/Publish/iTunesLyrics/</InstallUrl>
+    <UpdateUrl>http://amd989.github.io/Publish/iTunesLyrics/</UpdateUrl>
     <TargetCulture>en</TargetCulture>
     <ProductName>iTunes Lyrics</ProductName>
     <PublisherName>Alejandro Mora</PublisherName>
@@ -64,6 +66,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>key.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.0.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
@@ -128,12 +136,11 @@
     </Compile>
     <None Include="app.config" />
     <BaseApplicationManifest Include="Properties\app.manifest" />
-    <None Include="iTuneslyrics_TemporaryKey.pfx" />
+    <None Include="key.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="README.MD" />
     <None Include="Web References\org.lyricwiki\LyricsResult.datasource">
       <DependentUpon>Reference.map</DependentUpon>
     </None>
