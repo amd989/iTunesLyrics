@@ -1,5 +1,5 @@
 iTunesLyrics
-------------
+============
 
 Based on a previous version of iTunesLyrics Importer, I modified the code so that it continues to retrieve lyrics from lyrics wikia. Previously removed by the original author due to lyrics wikia removing support of their lyrics API.
 
@@ -7,7 +7,10 @@ Now I just crawl the site. nothing fancy but gets the job done.
 
 If you have any comment just let me know.
 
+Download
 
+
+[ClickOnce Installer](http://amd989.github.io/Publish/iTunesLyrics/iTuneslyrics.application)
 
 Credits
 -------
