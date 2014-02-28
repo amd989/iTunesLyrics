@@ -7,7 +7,7 @@ Now I just crawl the site. nothing fancy but gets the job done.
 
 If you have any comment just let me know.
 
-Download
+[Download](http://amd989.github.io/Publish/iTunesLyrics/iTunesLyrics.zip)
 
 
 [ClickOnce Installer](http://amd989.github.io/Publish/iTunesLyrics/iTuneslyrics.application)
