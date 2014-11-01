@@ -24,6 +24,10 @@ https://code.google.com/p/ilyrics/
 Change Log
 ----------
 
+Version 1.2.4 - 2014-10-31
+
+    * Removed scripted ad lyrics wiki is adding to their lyrics.  
+
 Version 1.2.1 - 2013-08-31
 
     * Uploaded to GitHub
