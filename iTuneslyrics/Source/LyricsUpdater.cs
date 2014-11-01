@@ -9,22 +9,23 @@ namespace iTuneslyrics.Source
 {
     class LyricsUpdater
     {
-        private List<IITFileOrCDTrack> m_selectedTracks;
-        private LyricWiki m_lyricsWiki;
-        private frmResult m_form;
-        private Boolean m_overwrite = false;
+        private readonly List<IITFileOrCDTrack> mSelectedTracks;
+        private readonly LyricWiki mLyricsWiki;
+        private readonly frmResult mForm;
+        private readonly Boolean mOverwrite;
 
         public LyricsUpdater(List<IITFileOrCDTrack> selectedTracks, LyricWiki lyricsWiki, Boolean overwrite, frmResult form)
         {
-            this.m_selectedTracks = selectedTracks;
-            this.m_lyricsWiki = lyricsWiki;
-            this.m_overwrite = overwrite;
-            this.m_form = form;
+            this.mOverwrite = false;
+            this.mSelectedTracks = selectedTracks;
+            this.mLyricsWiki = lyricsWiki;
+            this.mOverwrite = overwrite;
+            this.mForm = form;
         }
 
         public void UpdateLyrics()
         {
-            foreach (var currentTrack in m_selectedTracks)
+            foreach (var currentTrack in this.mSelectedTracks)
             {
                 var artist = currentTrack.Artist;
                 var song = currentTrack.Name;
@@ -33,21 +34,21 @@ namespace iTuneslyrics.Source
                     string.IsNullOrEmpty(song)) continue;
 
                 String[] row = { song, artist, "Processing..." };
-                var index = (int)m_form.Invoke(m_form.m_DelegateAddRow, new Object[] { row });
+                var index = (int)this.mForm.Invoke(this.mForm.m_DelegateAddRow, new Object[] { row });
 
-                if (currentTrack.Lyrics != null && !m_overwrite)
+                if (currentTrack.Lyrics != null && !this.mOverwrite)
                 {
-                    m_form.Invoke(m_form.m_DelegateUpdateRow, new Object[] { index, ResultCodes.Skipped });
+                    this.mForm.Invoke(this.mForm.m_DelegateUpdateRow, new Object[] { index, ResultCodes.Skipped });
                     continue;
                 }
 
                 try
                 {
                     var result = new LyricsResult { lyrics = string.Empty};
-                    if (m_lyricsWiki.checkSongExists(artist, song))
+                    if (this.mLyricsWiki.checkSongExists(artist, song))
                     {
-                        result = m_lyricsWiki.getSong(artist, song);
-                        if (m_overwrite || currentTrack.Lyrics == null)
+                        result = this.mLyricsWiki.getSong(artist, song);
+                        if (this.mOverwrite || currentTrack.Lyrics == null)
                         {
                             SetLyrics(currentTrack, result, index);
                         }
@@ -62,7 +63,7 @@ namespace iTuneslyrics.Source
                 {
                     //throw;
                     MessageBox.Show(e.Message);
-                    m_form.Invoke(m_form.m_DelegateUpdateRow, new Object[] { index, ResultCodes.NotFound });
+                    this.mForm.Invoke(this.mForm.m_DelegateUpdateRow, new Object[] { index, ResultCodes.NotFound });
                 }
             }
             MessageBox.Show(Resources.LyricsUpdater_UpdateLyrics_Completed, Resources.LyricsUpdater_UpdateLyrics_Completed, MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -90,7 +91,7 @@ namespace iTuneslyrics.Source
             }
             if (isFound == ResultCodes.Found)
                 currentTrack.Lyrics = lyrics;
-            m_form.Invoke(m_form.m_DelegateUpdateRow, new Object[] { index, isFound });
+            this.mForm.Invoke(this.mForm.m_DelegateUpdateRow, new Object[] { index, isFound });
         }
 
     }

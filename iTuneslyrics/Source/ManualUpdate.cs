@@ -14,17 +14,6 @@ namespace iTuneslyrics.Source
         public ManualUpdate()
         {
             InitializeComponent();
-
-            //  Initialize the AboutBox to display the product information from the assembly information.
-            //  Change assembly information settings for your application through either:
-            //  - Project->Properties->Application->Assembly Information
-            //  - AssemblyInfo.cs
-            //this.Text = String.Format("About {0}", AssemblyTitle);
-            //this.lblSong.Text = AssemblyProduct;
-            //this.lblArtist.Text = String.Format("Version {0}", AssemblyVersion);
-            //this.labelCopyright.Text = AssemblyCopyright;
-            //this.labelCompanyName.Text = AssemblyCompany;
-            //this.textBoxDescription.Text = AssemblyDescription;
         }
 
         #region Assembly Attribute Accessors

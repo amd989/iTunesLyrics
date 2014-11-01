@@ -79,7 +79,7 @@ namespace iTuneslyrics.Source
                 }
 
                 var lyrics = stringBuilder.ToString();
-                result = lyrics.Remove(lyrics.LastIndexOf(divider, System.StringComparison.Ordinal));
+                result = lyrics.Remove(lyrics.LastIndexOf(divider, StringComparison.Ordinal));
             }
             catch (Exception)
             {
@@ -96,15 +96,15 @@ namespace iTuneslyrics.Source
         private static string TransformCodes(string lyrics)
         {
             var result = string.Empty;
-            const string comment = "<!--";
+            const string Comment = "<!--";
             try
             {
 
                 if (!String.IsNullOrEmpty(lyrics))
                 {
-                    var regex = new Regex("(<div.*div>|<span.*span>)");
+                    var regex = new Regex("(<div.*div>|<span.*span>|<script.*script>)");
                     var toProcess = regex.Replace(lyrics, string.Empty);
-                    var index = toProcess.LastIndexOf(comment, StringComparison.OrdinalIgnoreCase);
+                    var index = toProcess.LastIndexOf(Comment, StringComparison.OrdinalIgnoreCase);
                     if (index >= 0)
                         toProcess = toProcess.Remove(index);
 
