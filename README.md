@@ -25,12 +25,12 @@ https://code.google.com/p/ilyrics/
 Change Log
 ----------
 
-Version 1.2.5 - 2015-04-26
+Version 1.2.1.5 - 2015-04-26
 
 * Added agility pack as reference
 * Changed publish location
 
-Version 1.2.4 - 2014-10-31
+Version 1.2.1.4 - 2014-10-31
 
 * Removed scripted ad lyrics wiki is adding to their lyrics.  
 
