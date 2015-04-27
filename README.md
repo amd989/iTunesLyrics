@@ -7,10 +7,12 @@ Now I just crawl the site. nothing fancy but gets the job done.
 
 If you have any comment just let me know.
 
-[Download](http://amd989.github.io/Publish/iTunesLyrics/iTunesLyrics.zip)
 
+Download
+--------
 
-[ClickOnce Installer](http://amd989.github.io/Publish/iTunesLyrics/iTuneslyrics.application)
+[ClickOnce Installer (supports auto-updates)](http://bit.ly/iTunesLyrics_clickonce)
+
 
 Credits
 -------
@@ -23,6 +25,10 @@ https://code.google.com/p/ilyrics/
 
 Change Log
 ----------
+
+Version 1.2.4 - 2015-04-26
+	* Added agility pack as reference
+	* Changed publish location
 
 Version 1.2.4 - 2014-10-31
 
