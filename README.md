@@ -1,64 +1,80 @@
-iTunesLyrics
-============
+# iTunesLyrics
 
-Based on a previous version of iTunesLyrics Importer, I modified the code so that it continues to retrieve lyrics from lyrics wikia. Previously removed by the original author due to lyrics wikia removing support of their lyrics APIs.
+A small Windows utility that fills in missing lyrics for the tracks in your iTunes library. Select songs (or let it scan the whole library), click a button, and it fetches lyrics and writes them back to the track's metadata so they travel with the file.
 
-Now I just crawl the site, nothing fancy but gets the job done. 
+Originally a fork of the discontinued [iLyrics](https://code.google.com/p/ilyrics/) that kept the LyricWiki integration alive after the upstream project dropped it. Now that LyricWiki itself is gone, the current version pulls lyrics from the [Genius](https://genius.com/) API instead.
 
-If you have any comment or question just let me know on the issues section
+## Requirements
 
-Download
---------
+- Windows with **iTunes** installed (the app talks to iTunes through COM, so a working local install is required — it won't run without one).
+- .NET Framework **4.7.2**.
+- A free **Genius API access token** — create one at <https://genius.com/api-clients> and paste it into **Settings → Genius API Token** on first launch.
 
-[ClickOnce Installer (supports auto-updates)](http://bit.ly/iTunesLyrics_clickonce)
+## Install
 
+**[ClickOnce Installer (auto-updates)](http://alejandro.md/publish/iTunesLyrics/)**
 
-Credits
--------
+The ClickOnce channel is the recommended install — it checks for updates in the background and keeps you on the latest release. A legacy NSIS installer script lives in `iTuneslyrics/InstallerScript/` but is no longer part of the release pipeline.
 
-All credits go to the original creator of this utility. 
+## Using it
 
-Original Project.
-https://code.google.com/p/ilyrics/
+1. Launch iTunesLyrics. iTunes will be brought to the foreground.
+2. Paste your Genius token under **Settings** (one-time).
+3. Either:
+   - Select tracks in iTunes and hit the process button, or
+   - Check **Fix** to scan the whole library for lyrics containing replacement characters (`�`) and re-fetch them.
+4. Pick a mode:
+   - **Automatic** — results stream into a grid as each track is looked up (Found / Not Found / Skipped).
+   - **Manual** — review each match before accepting it.
+5. Check **Overwrite** if you want existing lyrics replaced instead of skipped.
 
+## Building from source
 
-Change Log
-----------
+```
+nuget restore iTuneslyrics.sln
+msbuild iTuneslyrics.sln /p:Configuration=Debug
+```
 
-Version 1.2.1.5 - 2015-04-26
+The project targets **x86** in Debug because the iTunes COM interop (`iTunesLib`) is 32-bit only. Open `iTuneslyrics.sln` in Visual Studio 2017 or later.
 
-* Added agility pack as reference
-* Changed publish location
+## Credits
 
-Version 1.2.1.4 - 2014-10-31
+All credit for the original utility goes to the authors of [iLyrics](https://code.google.com/p/ilyrics/). This fork exists only to keep it working against current lyrics sources.
 
-* Removed scripted ad lyrics wiki is adding to their lyrics.  
+## Feedback
 
-Version 1.2.1 - 2013-08-31
+Bugs, requests, or questions: please open an issue on the [GitHub issues page](https://github.com/amd989/iTunesLyrics/issues).
 
-* Uploaded to GitHub
+## Changelog
 
-Version 1.2 - 2012-07-15
+### 1.3.0.0 — 2026
+- Migrated from LyricWiki to the Genius API (LyricWiki was discontinued).
+- Added a Settings menu for storing your Genius API token in `%APPDATA%\iTunesLyrics\config.txt` instead of hardcoding it.
 
-    * Support for Lyrics Wikia Restored.
+### 1.2.1.5 — 2015-04-26
+- Added HtmlAgilityPack as a reference.
+- Changed publish location.
 
+### 1.2.1.4 — 2014-10-31
+- Stripped the scripted ad LyricWiki was injecting into lyrics.
 
-Original Change Log
--------------------
+### 1.2.1 — 2013-08-31
+- Project uploaded to GitHub.
 
+### 1.2 — 2012-07-15
+- LyricWiki support restored after the upstream API change.
 
-Version 1.1.1 - 2008-09-19
+### Original changelog
 
-    * 1.1.1.2 fixed crashes while processing deleted files
-    * 1.1.1.1 blank artist and name tags will be skipped in batch mode
-    * 1.1.1.0 ability to overwrite lyrics in automatic mode
-    * 1.1.0.1 support for UTF-8 characters thanks to davidreis 
+**1.1.1 — 2008-09-19**
+- 1.1.1.2 fixed crashes while processing deleted files.
+- 1.1.1.1 blank artist/name tags are skipped in batch mode.
+- 1.1.1.0 ability to overwrite lyrics in automatic mode.
+- 1.1.0.1 UTF-8 character support (thanks to davidreis).
 
-Version 1.1 - 2007-03-07
+**1.1 — 2007-03-07**
+- A few bug fixes.
+- Update now skips songs that already have lyrics in iTunes.
 
-    * a few bug fixes
-    * update will now skip the song, for which the lyrics already exists in itunes. 
-
-Version 1.0 - 2007-02-08
-
-    * Initial Release 
+**1.0 — 2007-02-08**
+- Initial release.
