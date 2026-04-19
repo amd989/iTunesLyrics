@@ -12,7 +12,7 @@ Originally a fork of the discontinued [iLyrics](https://code.google.com/p/ilyric
 
 ## Install
 
-**[ClickOnce Installer (auto-updates)](http://alejandro.md/publish/iTunesLyrics/)**
+**[ClickOnce Installer (auto-updates)](https://l.alejandro.md/ituneslyrics_clickonce)**
 
 The ClickOnce channel is the recommended install — it checks for updates in the background and keeps you on the latest release. A legacy NSIS installer script lives in `iTuneslyrics/InstallerScript/` but is no longer part of the release pipeline.
 

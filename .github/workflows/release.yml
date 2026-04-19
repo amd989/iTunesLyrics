@@ -1,0 +1,129 @@
+name: Release
+
+on:
+  push:
+    tags: [v*]
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Setup .NET (for `dotnet restore` on SDK-style net472 project)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Git
+        run: |
+          git config --global url."https://user:${{ secrets.GITHUB_TOKEN }}@github".insteadOf https://github
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+
+      - name: Extract version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag.TrimStart('v')
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "Version: $version"
+
+      - name: Build portable distribution (unsigned)
+        shell: pwsh
+        run: ./build-portable.ps1 -Version ${{ steps.version.outputs.version }}
+
+      - name: Upload unsigned portable artifacts
+        id: upload-portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-portable-${{ steps.version.outputs.version }}
+          path: iTuneslyrics/bin/portable/
+
+      # - name: Sign portable executable
+      #   id: signpath-portable
+      #   uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+      #     organization-id: '${{ secrets.SIGNPATH_ORGANIZATION_ID }}'
+      #     project-slug: '${{ secrets.SIGNPATH_PROJECT_SLUG }}'
+      #     signing-policy-slug: '${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}'
+      #     artifact-configuration-slug: 'Portable'
+      #     github-artifact-id: '${{ steps.upload-portable.outputs.artifact-id }}'
+      #     wait-for-completion: true
+      #     output-artifact-directory: 'iTuneslyrics/bin/portable-signed'
+      #     parameters: |
+      #       version: ${{ toJSON(steps.version.outputs.version) }}
+
+      - name: Create portable ZIP
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $zipName = "ituneslyrics-$version-portable.zip"
+
+          if (Test-Path $zipName) {
+            Remove-Item $zipName -Force
+          }
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::CreateFromDirectory(
+            (Resolve-Path "iTuneslyrics/bin/portable").Path,
+            (Join-Path (Get-Location) $zipName),
+            [System.IO.Compression.CompressionLevel]::Optimal,
+            $false
+          )
+
+          Write-Output "Created portable ZIP: $zipName"
+
+      - name: Create GitHub Release with portable ZIP
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ituneslyrics-${{ steps.version.outputs.version }}-portable.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build ClickOnce package (unsigned)
+        shell: pwsh
+        run: ./release.ps1 -OnlyBuild
+
+      - name: Upload unsigned ClickOnce artifacts
+        id: upload-clickonce
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-clickonce-${{ steps.version.outputs.version }}
+          path: iTuneslyrics/bin/publish/
+
+      # - name: Submit signing request to SignPath
+      #   id: signpath
+      #   uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+      #     organization-id: '${{ secrets.SIGNPATH_ORGANIZATION_ID }}'
+      #     project-slug: '${{ secrets.SIGNPATH_PROJECT_SLUG }}'
+      #     signing-policy-slug: '${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}'
+      #     artifact-configuration-slug: 'ClickOnce'
+      #     github-artifact-id: '${{ steps.upload-clickonce.outputs.artifact-id }}'
+      #     wait-for-completion: true
+      #     output-artifact-directory: 'signed-clickonce'
+      #     parameters: |
+      #       version: ${{ toJSON(steps.version.outputs.version) }}
+
+      - name: Deploy ClickOnce to gh-pages
+        shell: pwsh
+        run: ./release.ps1
