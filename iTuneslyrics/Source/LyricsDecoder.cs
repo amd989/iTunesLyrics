@@ -103,7 +103,7 @@ namespace iTuneslyrics.Source
                 switch (child.NodeType)
                 {
                     case HtmlNodeType.Text:
-                        sb.Append(HttpUtility.HtmlDecode(((HtmlTextNode)child).Text));
+                        sb.Append(WebUtility.HtmlDecode(((HtmlTextNode)child).Text));
                         break;
 
                     case HtmlNodeType.Element:
