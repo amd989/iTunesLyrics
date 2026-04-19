@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <OutputType>WinExe</OutputType>
@@ -110,6 +110,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="FuzzySharp" />
     <PackageReference Include="Genius.NET" />
     <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="Jil" />

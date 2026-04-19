@@ -5,6 +5,7 @@
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="FuzzySharp" Version="2.0.2" />
     <PackageVersion Include="Genius.NET" Version="4.0.1" />
     <PackageVersion Include="HtmlAgilityPack" Version="1.4.9" />
     <PackageVersion Include="Jil" Version="2.17.0" />

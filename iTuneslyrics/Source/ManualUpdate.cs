@@ -5,7 +5,6 @@ using iTunesLib;
 using iTuneslyrics.Properties;
 using Genius.Core;
 using Genius;
-using System.Linq;
 
 namespace iTuneslyrics.Source
 {
@@ -123,12 +122,10 @@ namespace iTuneslyrics.Source
                 }
                 artPictureBox.ImageLocation = tempPath;
 
-                var searchArtist = TitleNormalizer.Normalize(artist);
-                var searchSong = TitleNormalizer.Normalize(song);
+                var searchArtist = TitleNormalizer.NormalizeForQuery(artist);
+                var searchSong = TitleNormalizer.NormalizeForQuery(song);
                 var query = await geniusClient.SearchClient.Search(searchArtist + " " + searchSong);
-                var match = query.Response.Hits.FirstOrDefault(s =>
-                    TitleNormalizer.Matches(s.Result.PrimaryArtist.Name, artist) &&
-                    TitleNormalizer.Matches(s.Result.Title, song));
+                var match = TitleNormalizer.PickBest(query.Response.Hits, artist, song);
 
                 if (match != null)
                 {

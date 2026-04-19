@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FuzzySharp;
 using Genius;
 using Genius.Core;
+using Genius.Models;
 using iTunesLib;
 using iTuneslyrics.Properties;
 
@@ -13,26 +17,88 @@ namespace iTuneslyrics.Source
 {
     internal static class TitleNormalizer
     {
-        // Strips "(feat. X)", "(ft X)", "(featuring X)", "(with X)" and the
-        // bracketed equivalents. iTunes metadata embeds featurings in the song
-        // title, Genius keeps them out-of-band — normalize both sides before
-        // comparing.
+        // Minimum weighted score (title 0.7 + artist 0.3) required to accept a Genius
+        // hit. Tuned empirically — above ~65 on TokenSetRatio usually means the same
+        // song modulo remaster/edition tags, below it is typically a different track.
+        public const int AcceptanceThreshold = 65;
+
+        // "(feat. X)", "(ft X)", "(featuring X)", "(with X)" — iTunes embeds
+        // featurings in the title, Genius keeps them out-of-band.
         private static readonly Regex FeaturingClause = new Regex(
             @"\s*[\(\[]\s*(feat\.?|featuring|ft\.?|with)\s[^)\]]*[\)\]]",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        // "(Remastered 2009)", "[Deluxe Edition]", "(Live at Wembley)" etc.
+        private static readonly Regex EditionClauseParen = new Regex(
+            @"\s*[\(\[]\s*(remastered|remaster|re\-?recorded|live|acoustic|unplugged|radio edit|single version|album version|extended( mix)?|deluxe|bonus track|mono|stereo|explicit|clean|instrumental|demo|edit|remix|version)\b[^)\]]*[\)\]]",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Trailing " - Remastered 2009", " - Live", etc. (no parens — common on Spotify imports).
+        private static readonly Regex EditionClauseDash = new Regex(
+            @"\s*[-\u2013\u2014]\s*(remastered|remaster|re\-?recorded|live|acoustic|unplugged|radio edit|single version|album version|extended( mix)?|deluxe|bonus track|mono|stereo|explicit|clean|instrumental|demo|edit|remix|version)\b.*$",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private static readonly Regex Punctuation = new Regex(@"[^\w\s]", RegexOptions.Compiled);
         private static readonly Regex Whitespace = new Regex(@"\s+", RegexOptions.Compiled);
 
-        public static string Normalize(string value)
+        // Kept separate from Normalize: the Genius search query benefits from featuring
+        // + edition stripping, but not from aggressive diacritic/punctuation stripping
+        // (Genius handles those fine and stripping them hurts recall for non-Latin artists).
+        public static string NormalizeForQuery(string value)
         {
             if (string.IsNullOrEmpty(value)) return string.Empty;
             var stripped = FeaturingClause.Replace(value, " ");
+            stripped = EditionClauseParen.Replace(stripped, " ");
+            stripped = EditionClauseDash.Replace(stripped, " ");
             return Whitespace.Replace(stripped, " ").Trim();
         }
 
-        public static bool Matches(string a, string b)
+        // Full normalization for fuzzy comparison: strips featurings, edition tags,
+        // diacritics, punctuation, and lowercases.
+        public static string Normalize(string value)
         {
-            return string.Equals(Normalize(a), Normalize(b), StringComparison.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+            var stripped = NormalizeForQuery(value);
+            var folded = StripDiacritics(stripped);
+            var noPunct = Punctuation.Replace(folded, " ");
+            return Whitespace.Replace(noPunct, " ").Trim().ToLowerInvariant();
+        }
+
+        private static string StripDiacritics(string value)
+        {
+            var decomposed = value.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder(decomposed.Length);
+            foreach (var c in decomposed)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+            return sb.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        public static int Score(SearchHit hit, string artist, string song)
+        {
+            if (hit?.Result == null) return 0;
+            var titleScore = Fuzz.TokenSetRatio(Normalize(hit.Result.Title), Normalize(song));
+            var artistScore = Fuzz.TokenSetRatio(Normalize(hit.Result.PrimaryArtist?.Name), Normalize(artist));
+            return (int)Math.Round(titleScore * 0.7 + artistScore * 0.3);
+        }
+
+        public static SearchHit PickBest(IEnumerable<SearchHit> hits, string artist, string song, int threshold = AcceptanceThreshold)
+        {
+            if (hits == null) return null;
+            SearchHit best = null;
+            var bestScore = -1;
+            foreach (var h in hits)
+            {
+                var s = Score(h, artist, song);
+                if (s > bestScore)
+                {
+                    bestScore = s;
+                    best = h;
+                }
+            }
+            return bestScore >= threshold ? best : null;
         }
     }
 
@@ -71,10 +137,10 @@ namespace iTuneslyrics.Source
 
                 try
                 {
-                    var searchArtist = TitleNormalizer.Normalize(artist);
-                    var searchSong = TitleNormalizer.Normalize(song);
+                    var searchArtist = TitleNormalizer.NormalizeForQuery(artist);
+                    var searchSong = TitleNormalizer.NormalizeForQuery(song);
                     var query = await this.geniusClient.SearchClient.Search(searchArtist + " " + searchSong);
-                    var hit = query.Response.Hits.FirstOrDefault();
+                    var hit = TitleNormalizer.PickBest(query.Response.Hits, artist, song);
                     if (hit == null)
                     {
                         this.mForm.UpdateRow(index, ResultCodes.NotFound);
