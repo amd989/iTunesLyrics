@@ -113,6 +113,7 @@
   <ItemGroup>
     <Compile Include="Source\LyricsDecoder.cs" />
     <Compile Include="Source\LyricsUpdater.cs" />
+    <Compile Include="Source\UserSettings.cs" />
     <Compile Include="Source\ManualUpdate.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -206,6 +207,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\iTunesHelper_APP_ICON.ico" />
+    <Content Include="Resources\settings.png" />
     <Content Include="VersionHistory.txt" />
   </ItemGroup>
   <ItemGroup>

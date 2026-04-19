@@ -36,7 +36,11 @@ namespace iTuneslyrics.Source
             this.chkOverwrite = new System.Windows.Forms.CheckBox();
             this.chkAuto = new System.Windows.Forms.CheckBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.settingsDropDown = new System.Windows.Forms.ToolStripDropDownButton();
+            this.apiTokenItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAlbums
@@ -95,12 +99,44 @@ namespace iTuneslyrics.Source
             this.toolTip.SetToolTip(this.chkAuto, "Update lyrics without asking for confirmation");
             this.chkAuto.UseVisualStyleBackColor = true;
             // 
+            // statusStrip
+            // 
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.settingsDropDown});
+            this.statusStrip.Location = new System.Drawing.Point(0, 45);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(388, 22);
+            this.statusStrip.SizingGrip = false;
+            this.statusStrip.TabIndex = 4;
+            // 
+            // settingsDropDown
+            // 
+            this.settingsDropDown.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.settingsDropDown.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.settingsDropDown.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.apiTokenItem});
+            this.settingsDropDown.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.settingsDropDown.Image = ((System.Drawing.Image)(resources.GetObject("settingsDropDown.Image")));
+            this.settingsDropDown.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.settingsDropDown.Name = "settingsDropDown";
+            this.settingsDropDown.Size = new System.Drawing.Size(29, 20);
+            this.settingsDropDown.Text = "toolStripDropDownButton1";
+            this.settingsDropDown.ToolTipText = "Settings";
+            // 
+            // apiTokenItem
+            // 
+            this.apiTokenItem.Name = "apiTokenItem";
+            this.apiTokenItem.Size = new System.Drawing.Size(180, 22);
+            this.apiTokenItem.Text = "Genius API Token…";
+            this.apiTokenItem.Click += new System.EventHandler(this.apiTokenItem_Click);
+            // 
             // iLyrics
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(388, 45);
+            this.ClientSize = new System.Drawing.Size(388, 67);
             this.Controls.Add(this.panel1);
+            this.Controls.Add(this.statusStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -109,7 +145,10 @@ namespace iTuneslyrics.Source
             this.Text = "iTunes Lyrics Importer";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -121,7 +160,8 @@ namespace iTuneslyrics.Source
         private System.Windows.Forms.CheckBox chkOverwrite;
         private System.Windows.Forms.CheckBox chkFix;
         private System.Windows.Forms.ToolTip toolTip;
-
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripDropDownButton settingsDropDown;
+        private System.Windows.Forms.ToolStripMenuItem apiTokenItem;
     }
 }
-
