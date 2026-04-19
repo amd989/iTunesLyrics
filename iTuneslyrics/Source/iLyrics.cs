@@ -21,6 +21,7 @@ namespace iTuneslyrics.Source
             _iTunesApp = new iTunesApp();
             _iTunesApp.BrowserWindow.Visible = true;
             _iTunesApp.BrowserWindow.Minimized = false;
+            alwaysOnTopItem.Checked = UserSettings.AlwaysOnTop;
         }
 
         private void btnAlbums_Click(object sender, EventArgs e)
@@ -31,7 +32,7 @@ namespace iTuneslyrics.Source
                 token = PromptForApiToken();
                 if (string.IsNullOrWhiteSpace(token))
                 {
-                    MessageBox.Show("A Genius API token is required. Set one via Settings \u2192 Genius API Token\u2026", "API Token Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(this, "A Genius API token is required. Set one via Settings \u2192 Genius API Token\u2026", "API Token Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
             }
@@ -49,7 +50,7 @@ namespace iTuneslyrics.Source
 
             if (selectedTracks.Count == 0)
             {
-                MessageBox.Show(Resources.iLyrics_btnAlbums_Click_Nothing_seems_to_be_selected);
+                MessageBox.Show(this, Resources.iLyrics_btnAlbums_Click_Nothing_seems_to_be_selected);
                 return;
             }
 
@@ -58,7 +59,7 @@ namespace iTuneslyrics.Source
             if (chkAuto.Checked == true)
             {
                 var fr = new frmResult(selectedTracks, _geniusClient, chkOverwrite.Checked);
-                fr.ShowDialog();
+                fr.ShowDialog(this);
             }
             else
             {
@@ -67,17 +68,23 @@ namespace iTuneslyrics.Source
                 {
                     updatedSongsCount++;
                     var ab = new ManualUpdate { currentTrack = currentTrack, geniusClient = (GeniusClient)_geniusClient};
-                    var dr = ab.ShowDialog();
+                    var dr = ab.ShowDialog(this);
                     if (dr == DialogResult.Abort)
                         break;
                 }
-                MessageBox.Show(updatedSongsCount == 0 ? "All selected songs seems to have lyrics" : "Update completed", "Complete");
+                MessageBox.Show(this, updatedSongsCount == 0 ? "All selected songs seems to have lyrics" : "Update completed", "Complete");
             }
         }
 
         private void apiTokenItem_Click(object sender, EventArgs e)
         {
             PromptForApiToken();
+        }
+
+        private void alwaysOnTopItem_CheckedChanged(object sender, EventArgs e)
+        {
+            this.TopMost = alwaysOnTopItem.Checked;
+            UserSettings.AlwaysOnTop = alwaysOnTopItem.Checked;
         }
 
         private string PromptForApiToken()
@@ -141,7 +148,7 @@ namespace iTuneslyrics.Source
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not save token: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, "Could not save token: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 return entered;
             }

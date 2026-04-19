@@ -37,8 +37,10 @@ namespace iTuneslyrics.Source
             this.chkAuto = new System.Windows.Forms.CheckBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.statusSpacer = new System.Windows.Forms.ToolStripStatusLabel();
             this.settingsDropDown = new System.Windows.Forms.ToolStripDropDownButton();
             this.apiTokenItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.alwaysOnTopItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -102,6 +104,7 @@ namespace iTuneslyrics.Source
             // statusStrip
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusSpacer,
             this.settingsDropDown});
             this.statusStrip.Location = new System.Drawing.Point(0, 45);
             this.statusStrip.Name = "statusStrip";
@@ -109,11 +112,17 @@ namespace iTuneslyrics.Source
             this.statusStrip.SizingGrip = false;
             this.statusStrip.TabIndex = 4;
             // 
+            // statusSpacer
+            // 
+            this.statusSpacer.Name = "statusSpacer";
+            this.statusSpacer.Size = new System.Drawing.Size(313, 17);
+            this.statusSpacer.Spring = true;
+            // 
             // settingsDropDown
             // 
-            this.settingsDropDown.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.settingsDropDown.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.settingsDropDown.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.alwaysOnTopItem,
             this.apiTokenItem});
             this.settingsDropDown.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.settingsDropDown.Image = ((System.Drawing.Image)(resources.GetObject("settingsDropDown.Image")));
@@ -127,8 +136,16 @@ namespace iTuneslyrics.Source
             // 
             this.apiTokenItem.Name = "apiTokenItem";
             this.apiTokenItem.Size = new System.Drawing.Size(180, 22);
-            this.apiTokenItem.Text = "Genius API Token…";
+            this.apiTokenItem.Text = "Genius API Token...";
             this.apiTokenItem.Click += new System.EventHandler(this.apiTokenItem_Click);
+            //
+            // alwaysOnTopItem
+            //
+            this.alwaysOnTopItem.Name = "alwaysOnTopItem";
+            this.alwaysOnTopItem.Size = new System.Drawing.Size(180, 22);
+            this.alwaysOnTopItem.Text = "Always on Top";
+            this.alwaysOnTopItem.CheckOnClick = true;
+            this.alwaysOnTopItem.CheckedChanged += new System.EventHandler(this.alwaysOnTopItem_CheckedChanged);
             // 
             // iLyrics
             // 
@@ -161,7 +178,9 @@ namespace iTuneslyrics.Source
         private System.Windows.Forms.CheckBox chkFix;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel statusSpacer;
         private System.Windows.Forms.ToolStripDropDownButton settingsDropDown;
         private System.Windows.Forms.ToolStripMenuItem apiTokenItem;
+        private System.Windows.Forms.ToolStripMenuItem alwaysOnTopItem;
     }
 }

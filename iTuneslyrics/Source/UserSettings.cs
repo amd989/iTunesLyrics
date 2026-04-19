@@ -5,16 +5,13 @@ namespace iTuneslyrics.Source
 {
     internal static class UserSettings
     {
-        public static string ConfigFilePath
-        {
-            get
-            {
-                var dir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "iTunesLyrics");
-                return Path.Combine(dir, "config.txt");
-            }
-        }
+        private static string SettingsDir => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "iTunesLyrics");
+
+        public static string ConfigFilePath => Path.Combine(SettingsDir, "config.txt");
+
+        private static string AlwaysOnTopPath => Path.Combine(SettingsDir, "alwaysOnTop.txt");
 
         public static string GeniusApiToken
         {
@@ -33,9 +30,30 @@ namespace iTuneslyrics.Source
             }
             set
             {
-                var path = ConfigFilePath;
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-                File.WriteAllText(path, value ?? string.Empty);
+                Directory.CreateDirectory(SettingsDir);
+                File.WriteAllText(ConfigFilePath, value ?? string.Empty);
+            }
+        }
+
+        public static bool AlwaysOnTop
+        {
+            get
+            {
+                try
+                {
+                    return File.Exists(AlwaysOnTopPath)
+                        && bool.TryParse(File.ReadAllText(AlwaysOnTopPath).Trim(), out var v)
+                        && v;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            set
+            {
+                Directory.CreateDirectory(SettingsDir);
+                File.WriteAllText(AlwaysOnTopPath, value ? "true" : "false");
             }
         }
     }
