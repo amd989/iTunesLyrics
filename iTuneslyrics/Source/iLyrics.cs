@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Genius;
+using Genius.Core;
 using iTunesLib;
 using iTuneslyrics.Properties;
 
@@ -10,11 +12,11 @@ namespace iTuneslyrics.Source
     public partial class iLyrics : Form
     {
         readonly IiTunes _iTunesApp;
-        org.lyricwiki.LyricWiki _lyricsWiki;
+        IGeniusClient _geniusClient;
         public iLyrics()
         {
             InitializeComponent();
-            _iTunesApp = new iTunesAppClass();
+            _iTunesApp = new iTunesApp();
             _iTunesApp.BrowserWindow.Visible = true;
             _iTunesApp.BrowserWindow.Minimized = false;
         }
@@ -54,7 +56,7 @@ namespace iTuneslyrics.Source
                     //    continue;
 
                     updatedSongsCount++;
-                    var ab = new ManualUpdate {currentTrack = currentTrack, lyricsWiki = _lyricsWiki};
+                    var ab = new ManualUpdate { currentTrack = currentTrack, geniusClient = (GeniusClient)_geniusClient};
                     var dr = ab.ShowDialog();
                     if (dr == DialogResult.Abort)
                         break;

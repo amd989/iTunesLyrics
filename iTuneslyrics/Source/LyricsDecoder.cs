@@ -1,125 +1,177 @@
-﻿using System;
+using System;
+using System.IO;
 using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace iTuneslyrics.Source
 {
     public class LyricsDecoder
     {
-        private static string ReadHtml(string url)
+        private const string UserAgent =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+            "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
+        private static async Task<string> ReadHtmlAsync(string url)
         {
-            string result;
             try
             {
-                // used to build entire input
-                var sb = new StringBuilder();
-                
-                // used on each read operation
-                var buf = new byte[8192];
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.UserAgent = UserAgent;
+                request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+                request.Headers[HttpRequestHeader.AcceptLanguage] = "en-US,en;q=0.9";
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                request.Timeout = 30000;
 
-                // prepare the web page we will be asking for
-                var request = (HttpWebRequest) WebRequest.Create(url);
-
-                // execute the request
-                var response = (HttpWebResponse) request.GetResponse();
-
-                // we will read data via the response stream
-                var stBuffer = response.GetResponseStream();
-
-                int count = 0;
-                do
+                using (var response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
+                using (var stream = response.GetResponseStream())
                 {
-                    // fill the buffer with data
-                    count = stBuffer.Read(buf, 0, buf.Length);
-
-                    // make sure we read some data
-                    if (count == 0) continue;
-                    // translate from bytes to ASCII text
-                    string tempString = Encoding.UTF8.GetString(buf, 0, count);
-
-                    // continue building the string
-                    sb.Append(tempString);
-                } while (count > 0); // any more data to read?
-                //sb.Replace("<!doctype html>", string.Empty);
-                result = sb.ToString();
+                    if (stream == null) return null;
+                    var encoding = GetEncoding(response);
+                    using (var reader = new StreamReader(stream, encoding))
+                    {
+                        return await reader.ReadToEndAsync().ConfigureAwait(false);
+                    }
+                }
             }
             catch (Exception)
             {
-                result = null;
+                return null;
             }
+        }
 
-            return result;
+        private static Encoding GetEncoding(HttpWebResponse response)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(response.CharacterSet))
+                    return Encoding.GetEncoding(response.CharacterSet);
+            }
+            catch (ArgumentException) { }
+            return Encoding.UTF8;
         }
 
         /// <summary>
-        /// Decodes the lyrics from HTML characters to string
+        /// Fetches a Genius lyrics page and extracts the lyrics text.
         /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static string DecodeLyrics(string url)
+        public static async Task<string> DecodeLyricsAsync(string url)
         {
-            string result;
-            const string divider = "..............";
-            var stringBuilder = new StringBuilder();
             try
             {
+                var source = await ReadHtmlAsync(url).ConfigureAwait(false);
+                if (string.IsNullOrEmpty(source)) return string.Empty;
+
                 var html = new HtmlDocument();
-                html.LoadHtml(ReadHtml(url));
-                var elements = html.DocumentNode.SelectNodes("//div[@class='lyricbox']");
+                html.LoadHtml(source);
 
-                foreach (var element in elements)
+                // Modern Genius markup: one or more section containers.
+                var containers = html.DocumentNode.SelectNodes("//div[@data-lyrics-container='true']");
+
+                // Legacy fallback: very old pages used <div class="lyrics"> wrapping a <p>.
+                if (containers == null || containers.Count == 0)
+                    containers = html.DocumentNode.SelectNodes("//div[contains(@class,'lyrics')]//p");
+
+                if (containers == null || containers.Count == 0) return string.Empty;
+
+                var sb = new StringBuilder();
+                foreach (var node in containers)
                 {
-                    stringBuilder.AppendLine(TransformCodes(element.InnerHtml));
-                    stringBuilder.AppendLine();
-                    stringBuilder.AppendLine(divider);
-                    stringBuilder.AppendLine();
+                    AppendNodeText(node, sb);
+                    if (sb.Length > 0 && sb[sb.Length - 1] != '\n')
+                        sb.Append('\n');
                 }
 
-                var lyrics = stringBuilder.ToString();
-                result = lyrics.Remove(lyrics.LastIndexOf(divider, StringComparison.Ordinal));
+                return CollapseBlankLines(sb.ToString()).Trim();
             }
             catch (Exception)
             {
-                result = string.Empty;
+                return string.Empty;
             }
-            return result;
         }
 
         /// <summary>
-        /// Transform the codes from HTML to String
+        /// Recursively walks the node tree: text nodes emit decoded text,
+        /// &lt;br&gt; emits a newline, block-ish elements emit a trailing newline,
+        /// everything else (spans, anchors from annotations) is flattened.
         /// </summary>
-        /// <param name="lyrics"></param>
-        /// <returns></returns>
-        private static string TransformCodes(string lyrics)
+        private static void AppendNodeText(HtmlNode node, StringBuilder sb)
         {
-            var result = string.Empty;
-            const string Comment = "<!--";
-            try
+            foreach (var child in node.ChildNodes)
             {
-
-                if (!String.IsNullOrEmpty(lyrics))
+                switch (child.NodeType)
                 {
-                    var regex = new Regex("(<div.*div>|<span.*span>|<script.*script>)");
-                    var toProcess = regex.Replace(lyrics, string.Empty);
-                    var index = toProcess.LastIndexOf(Comment, StringComparison.OrdinalIgnoreCase);
-                    if (index >= 0)
-                        toProcess = toProcess.Remove(index);
+                    case HtmlNodeType.Text:
+                        sb.Append(HttpUtility.HtmlDecode(((HtmlTextNode)child).Text));
+                        break;
 
-                    var htmlDecode = HttpUtility.HtmlDecode(toProcess);
-                    if (htmlDecode != null)
-                        result = htmlDecode.Replace("<br>", Environment.NewLine)
-                                           .Replace("<b>", string.Empty)
-                                           .Replace("</b>", string.Empty);
+                    case HtmlNodeType.Element:
+                        // Genius marks the contributor count, song title, About blurb
+                        // and "Read More" button inside the lyrics container with this
+                        // attribute so client-side selection skips them. Honor it.
+                        if (string.Equals(
+                                child.GetAttributeValue("data-exclude-from-selection", ""),
+                                "true",
+                                StringComparison.OrdinalIgnoreCase))
+                            break;
+
+                        var name = child.Name.ToLowerInvariant();
+                        if (name == "br")
+                        {
+                            sb.Append('\n');
+                        }
+                        else if (name == "script" || name == "style")
+                        {
+                            // skip
+                        }
+                        else
+                        {
+                            AppendNodeText(child, sb);
+                            if (IsBlockElement(name) && sb.Length > 0 && sb[sb.Length - 1] != '\n')
+                                sb.Append('\n');
+                        }
+                        break;
                 }
             }
-            catch (Exception)
+        }
+
+        private static bool IsBlockElement(string name)
+        {
+            switch (name)
             {
-                result = string.Empty;
+                case "p":
+                case "div":
+                case "li":
+                case "h1":
+                case "h2":
+                case "h3":
+                case "h4":
+                    return true;
+                default:
+                    return false;
             }
-            return result;
+        }
+
+        private static string CollapseBlankLines(string input)
+        {
+            var lines = input.Replace("\r\n", "\n").Split('\n');
+            var sb = new StringBuilder(input.Length);
+            var blankRun = 0;
+            foreach (var raw in lines)
+            {
+                var line = raw.TrimEnd();
+                if (line.Length == 0)
+                {
+                    if (++blankRun > 1) continue;
+                }
+                else
+                {
+                    blankRun = 0;
+                }
+                sb.Append(line).Append(Environment.NewLine);
+            }
+            return sb.ToString();
         }
     }
 }

@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
+using Genius.Core;
 using iTunesLib;
 
 namespace iTuneslyrics.Source
 {
-
     public enum ResultCodes
     {
         Found,
@@ -15,53 +14,43 @@ namespace iTuneslyrics.Source
         Skipped
     }
 
-    // delegates used to call MainForm functions from
-    //  worker thread
-    public delegate int DelegateAddRow(String[] row);
-    public delegate void DelegateUpdateRow(int index, ResultCodes result);
-
     public partial class frmResult : Form
     {
-        private List<IITFileOrCDTrack> m_selectedTracks;
-        private org.lyricwiki.LyricWiki m_lyricsWiki;
-        private Boolean m_overwrite = false;
+        private readonly List<IITFileOrCDTrack> m_selectedTracks;
+        private readonly IGeniusClient m_geniusClient;
+        private readonly bool m_overwrite;
 
-        // Delegate instances used to call user interface
-        // functions from worker thread:
-        public DelegateAddRow m_DelegateAddRow;
-        public DelegateUpdateRow m_DelegateUpdateRow;
-
-        public frmResult(List<IITFileOrCDTrack> selectedTracks, org.lyricwiki.LyricWiki lyricsWiki, Boolean overwrite) : this()
+        public frmResult(List<IITFileOrCDTrack> selectedTracks, IGeniusClient geniusClient, bool overwrite) : this()
         {
             this.m_selectedTracks = selectedTracks;
-            this.m_lyricsWiki = lyricsWiki;
+            this.m_geniusClient = geniusClient;
             this.m_overwrite = overwrite;
         }
 
         public frmResult()
         {
             InitializeComponent();
-
-            // initialize delegates
-            m_DelegateAddRow = AddRow;
-            m_DelegateUpdateRow = UpdateRow;
         }
 
-        private void frmResult_Load(object sender, EventArgs e)
+        private async void frmResult_Load(object sender, EventArgs e)
         {
-            var lu = new LyricsUpdater(m_selectedTracks, m_lyricsWiki, m_overwrite, this);
-            var threadDelegate = new ThreadStart(lu.UpdateLyrics);
-            var newThread = new Thread(threadDelegate);
-            newThread.Start();
+            var lu = new LyricsUpdater(m_selectedTracks, m_geniusClient, m_overwrite, this);
+            try
+            {
+                await lu.UpdateLyricsAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        private int AddRow(String[] row)
+        public int AddRow(string[] row)
         {
-            int index = this.dataGridView1.Rows.Add(row);
-            return index;
+            return this.dataGridView1.Rows.Add(row);
         }
 
-        private void UpdateRow(int index, ResultCodes result)
+        public void UpdateRow(int index, ResultCodes result)
         {
             switch (result)
             {

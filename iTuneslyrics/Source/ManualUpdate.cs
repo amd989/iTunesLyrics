@@ -3,13 +3,16 @@ using System.Windows.Forms;
 using System.Reflection;
 using iTunesLib;
 using iTuneslyrics.Properties;
+using Genius.Core;
+using Genius;
+using System.Linq;
 
 namespace iTuneslyrics.Source
 {
     partial class ManualUpdate : Form
     {
         
-        public org.lyricwiki.LyricWiki lyricsWiki = null;
+        public GeniusClient geniusClient = null;
         public IITFileOrCDTrack currentTrack = null;
         public ManualUpdate()
         {
@@ -103,13 +106,13 @@ namespace iTuneslyrics.Source
         }
         #endregion
 
-        private void AboutBox1_Load(object sender, EventArgs e)
+        private async void AboutBox1_Load(object sender, EventArgs e)
         {
             try
             {
-                String tempPath = "";
-                String artist = currentTrack.Artist;
-                String song = currentTrack.Name;
+                var tempPath = "";
+                var artist = currentTrack.Artist;
+                var song = currentTrack.Name;
 
                 lblArtist.Text = artist;
                 lblSong.Text = song;
@@ -119,10 +122,17 @@ namespace iTuneslyrics.Source
                     currentTrack.Artwork[1].SaveArtworkToFile(tempPath);
                 }
                 artPictureBox.ImageLocation = tempPath;
-                if (lyricsWiki.checkSongExists(artist, song) == true)
+
+                var searchArtist = TitleNormalizer.Normalize(artist);
+                var searchSong = TitleNormalizer.Normalize(song);
+                var query = await geniusClient.SearchClient.Search(searchArtist + " " + searchSong);
+                var match = query.Response.Hits.FirstOrDefault(s =>
+                    TitleNormalizer.Matches(s.Result.PrimaryArtist.Name, artist) &&
+                    TitleNormalizer.Matches(s.Result.Title, song));
+
+                if (match != null)
                 {
-                    var result = lyricsWiki.getSong(artist, song);
-                    lyricsBox.Text = result.lyrics.Equals("instrumental", StringComparison.OrdinalIgnoreCase) ? result.lyrics : LyricsDecoder.DecodeLyrics(result.url);
+                    lyricsBox.Text = await LyricsDecoder.DecodeLyricsAsync(match.Result.Url);
                 }
                 else
                 {
@@ -132,7 +142,7 @@ namespace iTuneslyrics.Source
             }
             catch (Exception)
             {
-                
+
             }
         }
 
