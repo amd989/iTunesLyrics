@@ -1,121 +1,564 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Ituneslyrics by amd989</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A free Windows utility that automatically fills in missing lyrics for every track in your iTunes library using the Genius API.">
+  <title>iTunesLyrics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #000;
+      --ink: #1d1d1f;
+      --gray: #86868b;
+      --rule: #d2d2d7;
+      --wash: #f5f5f7;
+      --white: #fff;
+      --blue: #0071e3;
+      --font: 'Outfit', -apple-system, sans-serif;
+      --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>Ituneslyrics</h1>
-        <p>Automatically add lyrics to your songs through this handy utility.</p>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-        <p class="view"><a href="https://github.com/amd989/iTunesLyrics">View the Project on GitHub <small>amd989/iTunesLyrics</small></a></p>
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--white);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.5;
+    }
 
+    .wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
 
-        <ul>
-          <li><a href="https://github.com/amd989/iTunesLyrics/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/amd989/iTunesLyrics/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/amd989/iTunesLyrics">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
-<a id="ituneslyrics" class="anchor" href="#ituneslyrics" aria-hidden="true"><span class="octicon octicon-link"></span></a>iTunesLyrics</h1>
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-<p>Based on a previous version of iTunesLyrics Importer, I modified the code so that it continues to retrieve lyrics from lyrics wikia. Previously removed by the original author due to lyrics wikia removing support of their lyrics APIs.</p>
+    strong { color: var(--ink); font-weight: 600; }
 
-<p>Now I just crawl the site, nothing fancy but gets the job done. </p>
+    code {
+      font-family: var(--mono);
+      font-size: 0.86em;
+      background: var(--wash);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
 
-<p>If you have any comment or question just let me know on the issues section</p>
+    /* ======================== HERO ======================== */
 
-<h2>
-<a id="download" class="anchor" href="#download" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download</h2>
+    .hero {
+      background: var(--black);
+      color: var(--white);
+      text-align: center;
+      padding: 140px 28px 120px;
+      position: relative;
+      overflow: hidden;
+    }
 
-<p><a href="http://bit.ly/iTunesLyrics_clickonce">ClickOnce Installer (supports auto-updates)</a></p>
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 113, 227, 0.07), transparent 70%);
+      top: 38%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
 
-<h2>
-<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
+    .hero-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #6366f1, #3b82f6);
+      margin: 0 auto 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-<p>All credits go to the original creator of this utility. </p>
+    .hero-icon svg { width: 34px; height: 34px; }
 
-<p>Original Project.
-<a href="https://code.google.com/p/ilyrics/">https://code.google.com/p/ilyrics/</a></p>
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+      margin-bottom: 16px;
+    }
 
-<h2>
-<a id="change-log" class="anchor" href="#change-log" aria-hidden="true"><span class="octicon octicon-link"></span></a>Change Log</h2>
+    .hero .lead {
+      font-size: 21px;
+      font-weight: 300;
+      color: var(--gray);
+      max-width: 440px;
+      margin: 0 auto 44px;
+      line-height: 1.45;
+    }
 
-<p>Version 1.2.1.5 - 2015-04-26</p>
+    .hero-meta {
+      margin-top: 24px;
+      font-size: 14px;
+      color: #6e6e73;
+      line-height: 2;
+    }
 
-<ul>
-<li>Added agility pack as reference</li>
-<li>Changed publish location</li>
-</ul>
+    .hero-meta a { color: var(--blue); }
 
-<p>Version 1.2.1.4 - 2014-10-31</p>
+    /* ====================== BUTTONS ====================== */
 
-<ul>
-<li>Removed scripted ad lyrics wiki is adding to their lyrics.<br>
-</li>
-</ul>
+    .btn {
+      display: inline-block;
+      padding: 13px 30px;
+      border-radius: 980px;
+      font-family: var(--font);
+      font-size: 17px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s;
+      border: none;
+      cursor: pointer;
+    }
 
-<p>Version 1.2.1 - 2013-08-31</p>
+    .btn:hover { text-decoration: none; }
 
-<ul>
-<li>Uploaded to GitHub</li>
-</ul>
+    .btn-primary { background: var(--blue); color: var(--white); }
+    .btn-primary:hover { background: #0077ed; }
 
-<p>Version 1.2 - 2012-07-15</p>
+    /* ===================== SECTIONS ===================== */
 
-<pre><code>* Support for Lyrics Wikia Restored.
-</code></pre>
+    section {
+      padding: 88px 0;
+    }
 
-<h2>
-<a id="original-change-log" class="anchor" href="#original-change-log" aria-hidden="true"><span class="octicon octicon-link"></span></a>Original Change Log</h2>
+    section.tinted { background: var(--wash); }
 
-<p>Version 1.1.1 - 2008-09-19</p>
+    section h2 {
+      font-size: 40px;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
 
-<pre><code>* 1.1.1.2 fixed crashes while processing deleted files
-* 1.1.1.1 blank artist and name tags will be skipped in batch mode
-* 1.1.1.0 ability to overwrite lyrics in automatic mode
-* 1.1.0.1 support for UTF-8 characters thanks to davidreis 
-</code></pre>
+    .prose {
+      font-size: 17px;
+      color: var(--gray);
+      line-height: 1.7;
+    }
 
-<p>Version 1.1 - 2007-03-07</p>
+    .prose + .prose { margin-top: 10px; }
 
-<pre><code>* a few bug fixes
-* update will now skip the song, for which the lyrics already exists in itunes. 
-</code></pre>
+    /* ==================== FEATURES ===================== */
 
-<p>Version 1.0 - 2007-02-08</p>
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      margin-top: 56px;
+    }
 
-<pre><code>* Initial Release 
-</code></pre>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/amd989">amd989</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+    .feature h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature p {
+      font-size: 15px;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* ================= LINED LIST =================== */
+
+    .lined {
+      list-style: none;
+      margin-top: 24px;
+    }
+
+    .lined li {
+      font-size: 17px;
+      color: var(--gray);
+      padding: 16px 0;
+      border-bottom: 1px solid var(--rule);
+      line-height: 1.55;
+    }
+
+    .lined li:first-child { border-top: 1px solid var(--rule); }
+
+    /* ================== DOWNLOAD ===================== */
+
+    .dl-center {
+      text-align: center;
+      margin-top: 36px;
+    }
+
+    .dl-links {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .dl-note {
+      margin-top: 28px;
+      font-size: 13px;
+      color: var(--gray);
+      text-align: center;
+    }
+
+    /* =================== STEPS ====================== */
+
+    .steps { list-style: none; margin-top: 24px; }
+
+    .step {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .step:first-child { border-top: 1px solid var(--rule); }
+
+    .step-n {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--rule);
+      line-height: 1.5;
+    }
+
+    .step-body {
+      font-size: 17px;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .step-sub {
+      margin-top: 8px;
+      list-style: none;
+    }
+
+    .step-sub li {
+      font-size: 15px;
+      color: var(--gray);
+      padding: 2px 0;
+    }
+
+    .step-sub li::before { content: '\2013\00a0'; }
+
+    /* ================== CODE BLOCK =================== */
+
+    .code-block {
+      background: var(--ink);
+      color: #e5e5e7;
+      padding: 22px 26px;
+      border-radius: 12px;
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.85;
+      overflow-x: auto;
+      margin-top: 24px;
+    }
+
+    .code-block .ps { color: var(--gray); user-select: none; }
+
+    .build-note {
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--gray);
+    }
+
+    /* ================== CHANGELOG ==================== */
+
+    .cl { margin-top: 16px; }
+
+    .cl-entry {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .cl > .cl-entry:first-child { border-top: 1px solid var(--rule); }
+
+    .cl-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .v-tag { font-size: 15px; font-weight: 600; }
+    .v-when { font-size: 14px; color: var(--gray); }
+
+    .cl-entry ul { list-style: none; }
+
+    .cl-entry li {
+      font-size: 15px;
+      color: var(--gray);
+      padding: 2px 0;
+    }
+
+    .cl-toggle {
+      background: none;
+      border: none;
+      color: var(--blue);
+      font-family: var(--font);
+      font-size: 15px;
+      cursor: pointer;
+      padding: 20px 0 0;
+      display: inline-block;
+    }
+
+    .cl-toggle:hover { text-decoration: underline; }
+
+    .cl-old { display: none; }
+    .cl-old.open { display: block; }
+
+    /* ===================== FOOTER ===================== */
+
+    footer {
+      background: var(--ink);
+      color: var(--gray);
+      text-align: center;
+      padding: 52px 28px;
+    }
+
+    footer p { font-size: 13px; line-height: 2; }
+    footer a { color: var(--gray); }
+    footer a:hover { color: var(--white); text-decoration: none; }
+
+    /* ================== ANIMATION ==================== */
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ================== RESPONSIVE =================== */
+
+    @media (max-width: 640px) {
+      .hero { padding: 96px 24px 80px; }
+      .hero h1 { font-size: 40px; }
+      .hero .lead { font-size: 18px; }
+      .hero-icon { width: 60px; height: 60px; border-radius: 14px; margin-bottom: 36px; }
+      .hero-icon svg { width: 28px; height: 28px; }
+
+      section { padding: 64px 0; }
+      section h2 { font-size: 30px; }
+
+      .features { grid-template-columns: 1fr; gap: 32px; }
+      .dl-links { flex-direction: column; align-items: center; gap: 14px; }
+
+      .step { grid-template-columns: 36px 1fr; }
+      .step-n { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-icon">
+      <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+      </svg>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-57230090-6");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
+    <h1>iTunesLyrics</h1>
+    <p class="lead">Lyrics for every song in your iTunes library.</p>
+    <a href="https://l.alejandro.md/ituneslyrics_clickonce" class="btn btn-primary">Download Free</a>
+    <p class="hero-meta">
+      Version 1.4.0 &middot; Windows &middot; Free<br>
+      <a href="https://github.com/amd989/iTunesLyrics">View on GitHub</a>
+    </p>
+  </header>
 
-  </body>
+  <section>
+    <div class="wrap reveal">
+      <h2>What It Does</h2>
+      <p class="prose">A small Windows utility that fills in missing lyrics for the tracks in your iTunes library. Select songs, or let it scan the whole library, click a button, and it fetches lyrics from <a href="https://genius.com/">Genius</a> and writes them back to the track metadata so they travel with the file.</p>
+      <p class="prose">Originally a fork of the discontinued <a href="https://code.google.com/p/ilyrics/">iLyrics</a>, kept alive after the upstream project dropped LyricWiki integration. The current version uses the Genius API.</p>
+      <div class="features">
+        <div class="feature">
+          <h3>Automatic Mode</h3>
+          <p>Batch-update your whole selection. Results stream into a grid as each lookup completes.</p>
+        </div>
+        <div class="feature">
+          <h3>Manual Review</h3>
+          <p>Review each lyrics match before accepting it. Full control over what gets written.</p>
+        </div>
+        <div class="feature">
+          <h3>Fix Mode</h3>
+          <p>Scan your library for corrupted lyrics containing replacement characters and re-fetch them.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap reveal">
+      <h2>Requirements</h2>
+      <ul class="lined">
+        <li>Windows with <strong>iTunes</strong> installed (required for COM interop)</li>
+        <li>.NET Framework <strong>4.7.2</strong></li>
+        <li>A free <strong>Genius API access token</strong> from <a href="https://genius.com/api-clients">genius.com/api-clients</a>, entered in Settings on first launch</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="tinted">
+    <div class="wrap reveal">
+      <h2>Download</h2>
+      <p class="prose">ClickOnce is the recommended install channel. It includes automatic updates.</p>
+      <div class="dl-center">
+        <a href="https://l.alejandro.md/ituneslyrics_clickonce" class="btn btn-primary">Install iTunesLyrics</a>
+        <div class="dl-links">
+          <a href="https://github.com/amd989/iTunesLyrics/zipball/master">Download ZIP</a>
+          <a href="https://github.com/amd989/iTunesLyrics/tarball/master">Download TAR</a>
+          <a href="https://github.com/amd989/iTunesLyrics">View on GitHub</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap reveal">
+      <h2>How to Use</h2>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-n">1</span>
+          <div class="step-body">Launch <strong>iTunesLyrics</strong>. iTunes will be brought to the foreground.</div>
+        </li>
+        <li class="step">
+          <span class="step-n">2</span>
+          <div class="step-body">Paste your Genius API token under <strong>Settings</strong> (one-time setup).</div>
+        </li>
+        <li class="step">
+          <span class="step-n">3</span>
+          <div class="step-body">
+            Choose tracks:
+            <ul class="step-sub">
+              <li>Select tracks in iTunes and click the process button</li>
+              <li>Or check <strong>Fix</strong> to scan the whole library for corrupted lyrics</li>
+            </ul>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-n">4</span>
+          <div class="step-body">
+            Choose mode:
+            <ul class="step-sub">
+              <li><strong>Automatic</strong> - results stream into a grid as each lookup completes</li>
+              <li><strong>Manual</strong> - review each match before accepting</li>
+            </ul>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-n">5</span>
+          <div class="step-body">Enable <strong>Overwrite</strong> to replace existing lyrics instead of skipping tracks that already have them.</div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap reveal">
+      <h2>Building from Source</h2>
+      <pre class="code-block"><span class="ps">$ </span>nuget restore iTuneslyrics.sln
+<span class="ps">$ </span>msbuild iTuneslyrics.sln /p:Configuration=Debug</pre>
+      <p class="build-note">Targets <strong>x86</strong> in Debug because <code>iTunesLib</code> COM interop is 32-bit only. Open <code>iTuneslyrics.sln</code> in Visual Studio 2017 or later.</p>
+    </div>
+  </section>
+
+  <section class="tinted">
+    <div class="wrap reveal">
+      <h2>Changelog</h2>
+      <div class="cl">
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.4.0.0</span><span class="v-when">April 19, 2026</span></div>
+          <ul>
+            <li>Migrated from LyricWiki to the Genius API</li>
+            <li>Added Settings support for storing your Genius token</li>
+          </ul>
+        </div>
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.2.1.5</span><span class="v-when">April 26, 2015</span></div>
+          <ul>
+            <li>Added HtmlAgilityPack as a reference</li>
+            <li>Changed publish location</li>
+          </ul>
+        </div>
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.2.1.4</span><span class="v-when">October 31, 2014</span></div>
+          <ul><li>Stripped the scripted ad LyricWiki injected into lyrics</li></ul>
+        </div>
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.2.1</span><span class="v-when">August 31, 2013</span></div>
+          <ul><li>Project uploaded to GitHub</li></ul>
+        </div>
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.2</span><span class="v-when">July 15, 2012</span></div>
+          <ul><li>LyricWiki support restored after upstream API change</li></ul>
+        </div>
+      </div>
+
+      <button class="cl-toggle" id="clToggle">Show original changelog</button>
+      <div class="cl-old cl" id="clOld">
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.1.1</span><span class="v-when">September 19, 2008</span></div>
+          <ul>
+            <li>1.1.1.2 - Fixed crashes while processing deleted files</li>
+            <li>1.1.1.1 - Blank artist/name tags skipped in batch mode</li>
+            <li>1.1.1.0 - Ability to overwrite lyrics in automatic mode</li>
+            <li>1.1.0.1 - UTF-8 character support (thanks to davidreis)</li>
+          </ul>
+        </div>
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.1</span><span class="v-when">March 7, 2007</span></div>
+          <ul>
+            <li>A few bug fixes</li>
+            <li>Update now skips songs that already have lyrics</li>
+          </ul>
+        </div>
+        <div class="cl-entry">
+          <div class="cl-head"><span class="v-tag">1.0</span><span class="v-when">February 8, 2007</span></div>
+          <ul><li>Initial release</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>All credit for the original utility goes to the authors of <a href="https://code.google.com/p/ilyrics/">iLyrics</a>.</p>
+    <p>Maintained by <a href="https://github.com/amd989">amd989</a> &middot; <a href="https://github.com/amd989/iTunesLyrics/issues">Report an issue</a></p>
+  </footer>
+
+  <script>
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+    document.getElementById('clToggle').addEventListener('click', function () {
+      var el = document.getElementById('clOld');
+      el.classList.toggle('open');
+      this.textContent = el.classList.contains('open') ? 'Hide original changelog' : 'Show original changelog';
+    });
+  </script>
+</body>
 </html>
