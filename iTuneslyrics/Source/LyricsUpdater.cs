@@ -140,7 +140,7 @@ namespace iTuneslyrics.Source
                     var searchArtist = TitleNormalizer.NormalizeForQuery(artist);
                     var searchSong = TitleNormalizer.NormalizeForQuery(song);
                     var query = await this.geniusClient.SearchClient.Search(searchArtist + " " + searchSong);
-                    var hit = TitleNormalizer.PickBest(query.Response.Hits, artist, song);
+                    var hit = TitleNormalizer.PickBest(query?.Response?.Hits, artist, song);
                     if (hit == null)
                     {
                         this.mForm.UpdateRow(index, ResultCodes.NotFound);

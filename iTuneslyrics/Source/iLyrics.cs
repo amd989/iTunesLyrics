@@ -18,9 +18,22 @@ namespace iTuneslyrics.Source
         public iLyrics()
         {
             InitializeComponent();
-            _iTunesApp = new iTunesApp();
-            _iTunesApp.BrowserWindow.Visible = true;
-            _iTunesApp.BrowserWindow.Minimized = false;
+            try
+            {
+                _iTunesApp = new iTunesApp();
+                _iTunesApp.BrowserWindow.Visible = true;
+                _iTunesApp.BrowserWindow.Minimized = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Could not connect to iTunes. Make sure iTunes is installed and running.\r\n\r\n" + ex.Message,
+                    "iTunes Unavailable",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                Application.Exit();
+                return;
+            }
             alwaysOnTopItem.Checked = UserSettings.AlwaysOnTop;
         }
 
@@ -41,11 +54,11 @@ namespace iTuneslyrics.Source
             if(chkFix.Checked)
             {
                 var tracks = _iTunesApp.LibraryPlaylist.Tracks;
-                selectedTracks = tracks.Cast<IITFileOrCDTrack>().Where(track => track.Lyrics != null && track.Lyrics.Contains("\uFFFD")).ToList();
+                selectedTracks = tracks.OfType<IITFileOrCDTrack>().Where(track => track.Lyrics != null && track.Lyrics.Contains("\uFFFD")).ToList();
             }
             else
             {
-                selectedTracks = _iTunesApp.SelectedTracks.Cast<IITFileOrCDTrack>().ToList();
+                selectedTracks = (_iTunesApp.SelectedTracks?.OfType<IITFileOrCDTrack>() ?? Enumerable.Empty<IITFileOrCDTrack>()).ToList();
             }
 
             if (selectedTracks.Count == 0)
@@ -67,7 +80,7 @@ namespace iTuneslyrics.Source
                 foreach (var currentTrack in selectedTracks)
                 {
                     updatedSongsCount++;
-                    var ab = new ManualUpdate { currentTrack = currentTrack, geniusClient = (GeniusClient)_geniusClient};
+                    var ab = new ManualUpdate(_geniusClient, currentTrack);
                     var dr = ab.ShowDialog(this);
                     if (dr == DialogResult.Abort)
                         break;

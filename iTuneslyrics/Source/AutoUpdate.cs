@@ -27,7 +27,7 @@ namespace iTuneslyrics.Source
             this.m_overwrite = overwrite;
         }
 
-        public frmResult()
+        private frmResult()
         {
             InitializeComponent();
         }
