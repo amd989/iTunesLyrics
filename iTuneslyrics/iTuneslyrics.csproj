@@ -11,10 +11,6 @@
     <Company>Alejandro Mora</Company>
     <Product>iTunesLyricsImporter</Product>
     <Copyright>Copyright © Alejandro Mora</Copyright>
-    <!-- CS1685: GuidAttribute conflict from ancient Sigil transitive deps (rc2-era
-         System.Runtime.InteropServices.PInvoke) vs the .NET 8 runtime. Harmless;
-         the compiler picks the runtime definition. -->
-    <NoWarn>$(NoWarn);CS1685</NoWarn>
   </PropertyGroup>
 
   <!-- ClickOnce -->
@@ -61,15 +57,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <COMReference Include="iTunesLib">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>13</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>9e93c96f-cf0d-43f6-8ba8-b807a3370712</Guid>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
+    <!-- Pre-generated COM interop for iTunes. Regenerate on a machine with iTunes:
+         tlbimp "C:\Program Files\iTunes\iTunes.exe" /out:lib\Interop.iTunesLib.dll /namespace:iTunesLib
+         Then commit the updated DLL. CI builds use this pre-generated DLL. -->
+    <Reference Include="Interop.iTunesLib">
+      <HintPath>..\lib\Interop.iTunesLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -79,7 +74,6 @@
 
   <ItemGroup>
     <PackageReference Include="FuzzySharp" />
-    <PackageReference Include="Genius.NET" />
     <PackageReference Include="HtmlAgilityPack" />
   </ItemGroup>
 </Project>

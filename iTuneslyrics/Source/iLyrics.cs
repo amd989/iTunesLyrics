@@ -1,20 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using Genius;
-using Genius.Core;
 using iTunesLib;
 using iTuneslyrics.Properties;
-using System.IO;
 
 namespace iTuneslyrics.Source
 {
     public partial class iLyrics : Form
     {
         readonly IiTunes _iTunesApp;
-        IGeniusClient _geniusClient;
+        IGeniusService _geniusService;
         public iLyrics()
         {
             InitializeComponent();
@@ -67,11 +65,11 @@ namespace iTuneslyrics.Source
                 return;
             }
 
-            _geniusClient = new GeniusClient(token);
+            _geniusService = new GeniusService(token);
 
             if (chkAuto.Checked == true)
             {
-                var fr = new frmResult(selectedTracks, _geniusClient, chkOverwrite.Checked);
+                var fr = new frmResult(selectedTracks, _geniusService, chkOverwrite.Checked);
                 fr.TopMost = this.TopMost;
                 fr.ShowDialog(this);
             }
@@ -81,7 +79,7 @@ namespace iTuneslyrics.Source
                 foreach (var currentTrack in selectedTracks)
                 {
                     updatedSongsCount++;
-                    var ab = new ManualUpdate(_geniusClient, currentTrack);
+                    var ab = new ManualUpdate(_geniusService, currentTrack);
                     ab.TopMost = this.TopMost;
                     var dr = ab.ShowDialog(this);
                     if (dr == DialogResult.Abort)

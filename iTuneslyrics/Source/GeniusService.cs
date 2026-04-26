@@ -1,64 +1,106 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
 namespace iTuneslyrics.Source
 {
-    public class LyricsDecoder
+    public class SearchHit
     {
+        public string Title { get; set; }
+        public string Url { get; set; }
+        public string ArtistName { get; set; }
+    }
+
+    public interface IGeniusService
+    {
+        Task<IReadOnlyList<SearchHit>> SearchAsync(string query);
+        Task<string> GetLyricsAsync(string url);
+    }
+
+    public class GeniusService : IGeniusService
+    {
+        private const string SearchEndpoint = "https://api.genius.com/search";
+
         private const string UserAgent =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-        private static readonly HttpClient HttpClient = CreateHttpClient();
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
-        private static HttpClient CreateHttpClient()
+        private readonly HttpClient _httpClient;
+
+        public GeniusService(string apiToken)
         {
             var handler = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
-            var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-            client.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-            client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
-            return client;
+            _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+            _httpClient.DefaultRequestHeaders.Accept.ParseAdd(
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiToken);
         }
 
-        private static async Task<string> ReadHtmlAsync(string url)
+        public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query)
         {
             try
             {
-                return await HttpClient.GetStringAsync(url).ConfigureAwait(false);
+                var url = $"{SearchEndpoint}?q={Uri.EscapeDataString(query)}";
+                var json = await _httpClient.GetStringAsync(url).ConfigureAwait(false);
+                var response = JsonSerializer.Deserialize<GeniusSearchResponse>(json, JsonOptions);
+
+                var hits = response?.Response?.Hits;
+                if (hits == null || hits.Count == 0)
+                    return Array.Empty<SearchHit>();
+
+                var results = new List<SearchHit>(hits.Count);
+                foreach (var h in hits)
+                {
+                    if (h.Result == null) continue;
+                    results.Add(new SearchHit
+                    {
+                        Title = h.Result.Title,
+                        Url = h.Result.Url,
+                        ArtistName = h.Result.PrimaryArtist?.Name
+                    });
+                }
+                return results;
             }
             catch (Exception)
             {
-                return null;
+                return Array.Empty<SearchHit>();
             }
         }
 
-        /// <summary>
-        /// Fetches a Genius lyrics page and extracts the lyrics text.
-        /// </summary>
-        public static async Task<string> DecodeLyricsAsync(string url)
+        public async Task<string> GetLyricsAsync(string url)
         {
             try
             {
-                var source = await ReadHtmlAsync(url).ConfigureAwait(false);
+                var source = await _httpClient.GetStringAsync(url).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(source)) return string.Empty;
 
                 var html = new HtmlDocument();
                 html.LoadHtml(source);
 
-                // Modern Genius markup: one or more section containers.
-                var containers = html.DocumentNode.SelectNodes("//div[@data-lyrics-container='true']");
+                var containers = html.DocumentNode.SelectNodes(
+                    "//div[@data-lyrics-container='true']");
 
-                // Legacy fallback: very old pages used <div class="lyrics"> wrapping a <p>.
                 if (containers == null || containers.Count == 0)
-                    containers = html.DocumentNode.SelectNodes("//div[contains(@class,'lyrics')]//p");
+                    containers = html.DocumentNode.SelectNodes(
+                        "//div[contains(@class,'lyrics')]//p");
 
                 if (containers == null || containers.Count == 0) return string.Empty;
 
@@ -78,11 +120,6 @@ namespace iTuneslyrics.Source
             }
         }
 
-        /// <summary>
-        /// Recursively walks the node tree: text nodes emit decoded text,
-        /// &lt;br&gt; emits a newline, block-ish elements emit a trailing newline,
-        /// everything else (spans, anchors from annotations) is flattened.
-        /// </summary>
         private static void AppendNodeText(HtmlNode node, StringBuilder sb)
         {
             foreach (var child in node.ChildNodes)
@@ -94,9 +131,6 @@ namespace iTuneslyrics.Source
                         break;
 
                     case HtmlNodeType.Element:
-                        // Genius marks the contributor count, song title, About blurb
-                        // and "Read More" button inside the lyrics container with this
-                        // attribute so client-side selection skips them. Honor it.
                         if (string.Equals(
                                 child.GetAttributeValue("data-exclude-from-selection", ""),
                                 "true",
@@ -160,5 +194,36 @@ namespace iTuneslyrics.Source
             }
             return sb.ToString();
         }
+
+        #region JSON Models (Genius API response)
+
+        private class GeniusSearchResponse
+        {
+            public GeniusResponseBody Response { get; set; }
+        }
+
+        private class GeniusResponseBody
+        {
+            public List<GeniusHit> Hits { get; set; }
+        }
+
+        private class GeniusHit
+        {
+            public GeniusSong Result { get; set; }
+        }
+
+        private class GeniusSong
+        {
+            public string Title { get; set; }
+            public string Url { get; set; }
+            public GeniusArtist PrimaryArtist { get; set; }
+        }
+
+        private class GeniusArtist
+        {
+            public string Name { get; set; }
+        }
+
+        #endregion
     }
 }

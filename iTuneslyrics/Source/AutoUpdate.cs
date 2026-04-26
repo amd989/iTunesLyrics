@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using Genius.Core;
 using iTunesLib;
 
 namespace iTuneslyrics.Source
@@ -17,13 +16,13 @@ namespace iTuneslyrics.Source
     public partial class frmResult : Form
     {
         private readonly List<IITFileOrCDTrack> m_selectedTracks;
-        private readonly IGeniusClient m_geniusClient;
+        private readonly IGeniusService m_geniusService;
         private readonly bool m_overwrite;
 
-        public frmResult(List<IITFileOrCDTrack> selectedTracks, IGeniusClient geniusClient, bool overwrite) : this()
+        public frmResult(List<IITFileOrCDTrack> selectedTracks, IGeniusService geniusService, bool overwrite) : this()
         {
             this.m_selectedTracks = selectedTracks;
-            this.m_geniusClient = geniusClient;
+            this.m_geniusService = geniusService;
             this.m_overwrite = overwrite;
         }
 
@@ -34,7 +33,7 @@ namespace iTuneslyrics.Source
 
         private async void frmResult_Load(object sender, EventArgs e)
         {
-            var lu = new LyricsUpdater(m_selectedTracks, m_geniusClient, m_overwrite, this);
+            var lu = new LyricsUpdater(m_selectedTracks, m_geniusService, m_overwrite, this);
             try
             {
                 await lu.UpdateLyricsAsync();
