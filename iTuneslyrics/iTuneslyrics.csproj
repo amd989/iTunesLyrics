@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\iTunesHelper_APP_ICON.ico</ApplicationIcon>
@@ -61,19 +61,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\iTunesHelper_APP_ICON.ico" />
-    <Content Include="Resources\settings.png" />
+    <COMReference Include="iTunesLib">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>13</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>9e93c96f-cf0d-43f6-8ba8-b807a3370712</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Pre-generated COM interop for iTunes. Regenerate on a machine with iTunes:
-         tlbimp "C:\Program Files\iTunes\iTunes.exe" /out:lib\Interop.iTunesLib.dll /namespace:iTunesLib
-         Then commit the updated DLL. CI builds use this pre-generated DLL. -->
-    <Reference Include="Interop.iTunesLib">
-      <HintPath>..\lib\Interop.iTunesLib.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-      <Private>False</Private>
-    </Reference>
+    <Content Include="Resources\iTunesHelper_APP_ICON.ico" />
+    <Content Include="Resources\settings.png" />
   </ItemGroup>
 
   <ItemGroup>

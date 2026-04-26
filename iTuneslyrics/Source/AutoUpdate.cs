@@ -63,7 +63,9 @@ namespace iTuneslyrics.Source
                     break;
                 case ResultCodes.Skipped:
                     this.dataGridView1.Rows[index].Cells[2].Value = "Skipped";
-                    this.dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.YellowGreen;
+                    var isDark = this.BackColor.GetBrightness() < 0.5f;
+                    this.dataGridView1.Rows[index].DefaultCellStyle.BackColor =
+                        isDark ? Color.FromArgb(60, 80, 30) : Color.YellowGreen;
                     break;
             }
             dataGridView1.FirstDisplayedScrollingRowIndex = index;
