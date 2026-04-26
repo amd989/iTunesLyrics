@@ -72,6 +72,7 @@ namespace iTuneslyrics.Source
             if (chkAuto.Checked == true)
             {
                 var fr = new frmResult(selectedTracks, _geniusClient, chkOverwrite.Checked);
+                fr.TopMost = this.TopMost;
                 fr.ShowDialog(this);
             }
             else
@@ -81,6 +82,7 @@ namespace iTuneslyrics.Source
                 {
                     updatedSongsCount++;
                     var ab = new ManualUpdate(_geniusClient, currentTrack);
+                    ab.TopMost = this.TopMost;
                     var dr = ab.ShowDialog(this);
                     if (dr == DialogResult.Abort)
                         break;
@@ -150,6 +152,7 @@ namespace iTuneslyrics.Source
                 dialog.Controls.Add(cancelButton);
                 dialog.AcceptButton = okButton;
                 dialog.CancelButton = cancelButton;
+                dialog.TopMost = this.TopMost;
 
                 if (dialog.ShowDialog(this) != DialogResult.OK)
                     return UserSettings.GeniusApiToken;

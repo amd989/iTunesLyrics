@@ -22,12 +22,6 @@ if ([string]::IsNullOrEmpty($Version)) {
     Write-Output "Using specified version: $Version"
 }
 
-# Find MSBuild via vswhere
-$msBuildPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
-    -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe `
-    -prerelease | Select-Object -First 1
-Write-Output "MSBuild: $msBuildPath"
-
 $projDir = "iTuneslyrics"
 $outputDir = "bin/portable"
 $publishDir = "$projDir/$outputDir"
@@ -37,21 +31,14 @@ if (Test-Path $publishDir) {
     Remove-Item -Path $publishDir -Recurse -Force
 }
 
-# Restore + build Release
-Push-Location $projDir
-try {
-    Write-Output "Restoring:"
-    dotnet restore iTuneslyrics.csproj
-    if ($LASTEXITCODE -ne 0) { Write-Error "Restore failed"; exit 1 }
-
-    Write-Output "Building:"
-    & $msBuildPath iTuneslyrics.csproj /t:Build /p:Configuration=Release /p:Platform=AnyCPU `
-        /p:Version=$Version /p:OutDir="$outputDir\" /v:m
-    if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
-}
-finally {
-    Pop-Location
-}
+# Publish self-contained for portability
+Write-Output "Publishing:"
+dotnet publish "$projDir/iTuneslyrics.csproj" `
+    -c Release `
+    -o "$publishDir" `
+    -p:Version=$Version `
+    --self-contained false
+if ($LASTEXITCODE -ne 0) { Write-Error "Publish failed"; exit 1 }
 
 # Create ZIP
 $zipName = "ituneslyrics-$Version-portable.zip"

@@ -1,9 +1,8 @@
 using System;
-using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using HtmlAgilityPack;
 
 namespace iTuneslyrics.Source
@@ -14,43 +13,31 @@ namespace iTuneslyrics.Source
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
+        private static readonly HttpClient HttpClient = CreateHttpClient();
+
+        private static HttpClient CreateHttpClient()
+        {
+            var handler = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+            client.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
+            return client;
+        }
+
         private static async Task<string> ReadHtmlAsync(string url)
         {
             try
             {
-                var request = (HttpWebRequest)WebRequest.Create(url);
-                request.UserAgent = UserAgent;
-                request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-                request.Headers[HttpRequestHeader.AcceptLanguage] = "en-US,en;q=0.9";
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                request.Timeout = 30000;
-
-                using (var response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
-                using (var stream = response.GetResponseStream())
-                {
-                    if (stream == null) return null;
-                    var encoding = GetEncoding(response);
-                    using (var reader = new StreamReader(stream, encoding))
-                    {
-                        return await reader.ReadToEndAsync().ConfigureAwait(false);
-                    }
-                }
+                return await HttpClient.GetStringAsync(url).ConfigureAwait(false);
             }
             catch (Exception)
             {
                 return null;
             }
-        }
-
-        private static Encoding GetEncoding(HttpWebResponse response)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(response.CharacterSet))
-                    return Encoding.GetEncoding(response.CharacterSet);
-            }
-            catch (ArgumentException) { }
-            return Encoding.UTF8;
         }
 
         /// <summary>
