@@ -7,9 +7,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FuzzySharp;
-using Genius;
-using Genius.Core;
-using Genius.Models;
 using iTunesLib;
 using iTuneslyrics.Properties;
 
@@ -78,9 +75,9 @@ namespace iTuneslyrics.Source
 
         public static int Score(SearchHit hit, string artist, string song)
         {
-            if (hit?.Result == null) return 0;
-            var titleScore = Fuzz.TokenSetRatio(Normalize(hit.Result.Title), Normalize(song));
-            var artistScore = Fuzz.TokenSetRatio(Normalize(hit.Result.PrimaryArtist?.Name), Normalize(artist));
+            if (hit == null) return 0;
+            var titleScore = Fuzz.TokenSetRatio(Normalize(hit.Title), Normalize(song));
+            var artistScore = Fuzz.TokenSetRatio(Normalize(hit.ArtistName), Normalize(artist));
             return (int)Math.Round(titleScore * 0.7 + artistScore * 0.3);
         }
 
@@ -105,14 +102,14 @@ namespace iTuneslyrics.Source
     class LyricsUpdater
     {
         private readonly List<IITFileOrCDTrack> mSelectedTracks;
-        private readonly GeniusClient geniusClient;
+        private readonly IGeniusService geniusService;
         private readonly frmResult mForm;
         private readonly bool mOverwrite;
 
-        public LyricsUpdater(List<IITFileOrCDTrack> selectedTracks, IGeniusClient geniusClient, bool overwrite, frmResult form)
+        public LyricsUpdater(List<IITFileOrCDTrack> selectedTracks, IGeniusService geniusService, bool overwrite, frmResult form)
         {
             this.mSelectedTracks = selectedTracks;
-            this.geniusClient = (GeniusClient)geniusClient;
+            this.geniusService = geniusService;
             this.mOverwrite = overwrite;
             this.mForm = form;
         }
@@ -139,8 +136,8 @@ namespace iTuneslyrics.Source
                 {
                     var searchArtist = TitleNormalizer.NormalizeForQuery(artist);
                     var searchSong = TitleNormalizer.NormalizeForQuery(song);
-                    var query = await this.geniusClient.SearchClient.Search(searchArtist + " " + searchSong);
-                    var hit = TitleNormalizer.PickBest(query?.Response?.Hits, artist, song);
+                    var hits = await this.geniusService.SearchAsync(searchArtist + " " + searchSong);
+                    var hit = TitleNormalizer.PickBest(hits, artist, song);
                     if (hit == null)
                     {
                         this.mForm.UpdateRow(index, ResultCodes.NotFound);
@@ -149,7 +146,7 @@ namespace iTuneslyrics.Source
 
                     if (this.mOverwrite || currentTrack.Lyrics == null)
                     {
-                        await SetLyricsAsync(currentTrack, hit.Result.Url, index);
+                        await SetLyricsAsync(currentTrack, hit.Url, index);
                     }
                     else
                     {
@@ -167,7 +164,7 @@ namespace iTuneslyrics.Source
 
         private async Task SetLyricsAsync(IITFileOrCDTrack currentTrack, string lyricsUrl, int index)
         {
-            var lyrics = await LyricsDecoder.DecodeLyricsAsync(lyricsUrl);
+            var lyrics = await geniusService.GetLyricsAsync(lyricsUrl);
             var isFound = string.IsNullOrEmpty(lyrics) ? ResultCodes.NotFound : ResultCodes.Found;
 
             if (isFound == ResultCodes.Found)

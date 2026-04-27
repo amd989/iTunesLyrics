@@ -1,15 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <ManifestCertificateThumbprint>C100ECA9E030E8938E5D24CEB38797DCE8D80D8F</ManifestCertificateThumbprint>
-    <ManifestKeyFile>iTuneslyrics_TemporaryKey.pfx</ManifestKeyFile>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\iTunesHelper_APP_ICON.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version Condition="'$(Version)' == ''">1.4.0</Version>
+    <AssemblyTitle>iTunes Lyrics Importer</AssemblyTitle>
+    <Description>Import lyrics into iTunes from Genius.</Description>
+    <Company>Alejandro Mora</Company>
+    <Product>iTunesLyricsImporter</Product>
+    <Copyright>Copyright © Alejandro Mora</Copyright>
+  </PropertyGroup>
+
+  <!-- ClickOnce -->
+  <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
-    <TargetZone>LocalIntranet</TargetZone>
     <SignManifests>false</SignManifests>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ApplicationIcon>Resources\iTunesHelper_APP_ICON.ico</ApplicationIcon>
-    <StartupObject></StartupObject>
     <PublishUrl>https://amd989.github.io/iTunesLyrics/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -29,71 +37,43 @@
     <PublisherName>Alejandro Mora</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>6</ApplicationRevision>
-    <ApplicationVersion>1.3.0.%2a</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-    <Version Condition="'$(Version)' == ''">1.3.0</Version>
-    <AssemblyTitle>iTunes Lyrics Importer</AssemblyTitle>
-    <Description>Import lyrics into iTunes from Genius.</Description>
-    <Company>Alejandro Mora</Company>
-    <Product>iTunesLyricsImporter</Product>
-    <Copyright>Copyright © Alejandro Mora</Copyright>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>iTuneslyrics_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data.DataSetExtensions" />
-  </ItemGroup>
+
   <ItemGroup>
     <BaseApplicationManifest Include="Properties\app.manifest" />
   </ItemGroup>
+
   <ItemGroup>
-    <WebReferences Include="Web References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\iTunesHelper_APP_ICON.ico" />
-    <Content Include="Resources\settings.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <!-- Pre-generated COM interop. Regenerate by re-adding the COMReference
-         for iTunesLib on a machine with iTunes installed, copying the built
-         Interop.iTunesLib.dll into ../lib/, then reverting the csproj. -->
+    <!-- Pre-generated COM interop for iTunes. Regenerate on a machine with iTunes:
+         tlbimp "C:\Program Files\iTunes\iTunes.exe" /out:lib\Interop.iTunesLib.dll /namespace:iTunesLib
+         Then commit the updated DLL. CI builds use this pre-generated DLL. -->
     <Reference Include="Interop.iTunesLib">
       <HintPath>..\lib\Interop.iTunesLib.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\iTunesHelper_APP_ICON.ico" />
+    <Content Include="Resources\settings.png" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="FuzzySharp" />
-    <PackageReference Include="Genius.NET" />
     <PackageReference Include="HtmlAgilityPack" />
-    <PackageReference Include="Jil" />
-    <PackageReference Include="Sigil" />
   </ItemGroup>
 </Project>

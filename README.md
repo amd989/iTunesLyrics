@@ -7,7 +7,7 @@ Originally a fork of the discontinued [iLyrics](https://code.google.com/p/ilyric
 ## Requirements
 
 - Windows with **iTunes** installed (the app talks to iTunes through COM, so a working local install is required — it won't run without one).
-- .NET Framework **4.7.2**.
+- **.NET 10** runtime (the app is a self-contained WinForms executable, so no separate install is needed when using the ClickOnce or portable builds).
 - A free **Genius API access token** — create one at <https://genius.com/api-clients> and paste it into **Settings → Genius API Token** on first launch.
 
 ## Install
@@ -31,11 +31,16 @@ The ClickOnce channel is the recommended install — it checks for updates in th
 ## Building from source
 
 ```
-nuget restore iTuneslyrics.sln
-msbuild iTuneslyrics.sln /p:Configuration=Debug
+dotnet build iTuneslyrics.sln
 ```
 
-The project targets **x86** in Debug because the iTunes COM interop (`iTunesLib`) is 32-bit only. Open `iTuneslyrics.sln` in Visual Studio 2017 or later.
+Requires the **.NET 10 SDK**. NuGet restore happens automatically. Open `iTuneslyrics.sln` in Visual Studio 2022 or later, or build from the command line with `dotnet build`.
+
+The iTunes COM interop DLL (`lib/Interop.iTunesLib.dll`) is pre-generated and checked into the repo so CI builds work without a local iTunes install. To regenerate it (requires iTunes):
+
+```
+tlbimp "C:\Program Files\iTunes\iTunes.exe" /out:lib\Interop.iTunesLib.dll /namespace:iTunesLib
+```
 
 ## Credits
 
@@ -46,6 +51,17 @@ All credit for the original utility goes to the authors of [iLyrics](https://cod
 Bugs, requests, or questions: please open an issue on the [GitHub issues page](https://github.com/amd989/iTunesLyrics/issues).
 
 ## Changelog
+
+### 1.5.0 — 2026-04-26
+- Migrated from .NET Framework 4.7.2 to **.NET 10**.
+- Dark mode support -- the app follows the Windows system theme automatically.
+- Replaced the Genius.NET library with a lightweight direct HTTP client 
+- Build system modernized: `dotnet build` replaces `msbuild`/`nuget restore`
+
+### 1.4.0 — 2026-04-19
+- Fuzzy matching (FuzzySharp) for more accurate Genius search results.
+- Always-on-top..
+- ClickOnce and portable ZIP builds via GitHub Actions.
 
 ### 1.3.0.0 — 2026
 - Migrated from LyricWiki to the Genius API (LyricWiki was discontinued).

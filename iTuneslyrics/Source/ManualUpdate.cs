@@ -3,19 +3,17 @@ using System.Windows.Forms;
 using System.Reflection;
 using iTunesLib;
 using iTuneslyrics.Properties;
-using Genius;
-using Genius.Core;
 
 namespace iTuneslyrics.Source
 {
     partial class ManualUpdate : Form
     {
-        private readonly GeniusClient geniusClient;
+        private readonly IGeniusService geniusService;
         private readonly IITFileOrCDTrack currentTrack;
 
-        public ManualUpdate(IGeniusClient geniusClient, IITFileOrCDTrack currentTrack)
+        public ManualUpdate(IGeniusService geniusService, IITFileOrCDTrack currentTrack)
         {
-            this.geniusClient = (GeniusClient)(geniusClient ?? throw new ArgumentNullException(nameof(geniusClient)));
+            this.geniusService = geniusService ?? throw new ArgumentNullException(nameof(geniusService));
             this.currentTrack = currentTrack ?? throw new ArgumentNullException(nameof(currentTrack));
             InitializeComponent();
         }
@@ -33,7 +31,7 @@ namespace iTuneslyrics.Source
                     if (titleAttribute.Title != "")
                         return titleAttribute.Title;
                 }
-                return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
+                return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
             }
         }
 
@@ -103,13 +101,12 @@ namespace iTuneslyrics.Source
 
                 var searchArtist = TitleNormalizer.NormalizeForQuery(artist);
                 var searchSong = TitleNormalizer.NormalizeForQuery(song);
-                var query = await geniusClient.SearchClient.Search(searchArtist + " " + searchSong);
-                var hits = query?.Response?.Hits;
+                var hits = await geniusService.SearchAsync(searchArtist + " " + searchSong);
                 var match = TitleNormalizer.PickBest(hits, artist, song);
 
                 if (match != null)
                 {
-                    lyricsBox.Text = await LyricsDecoder.DecodeLyricsAsync(match.Result.Url);
+                    lyricsBox.Text = await geniusService.GetLyricsAsync(match.Url);
                 }
                 else
                 {

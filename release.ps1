@@ -56,7 +56,7 @@ try {
     # Verify ClickOnce artifacts were produced.
     $appFilesDir = "$publishDir/Application Files"
     if (-Not (Test-Path $appFilesDir)) {
-        throw "ClickOnce artifacts not found at '$appFilesDir'. Publish likely ran in plain-copy mode — ensure Properties/PublishProfiles/ClickOnceProfile.pubxml is present and PublishProfile resolved correctly."
+        throw "ClickOnce artifacts not found at '$appFilesDir'. Publish likely ran in plain-copy mode -- ensure Properties/PublishProfiles/ClickOnceProfile.pubxml is present and PublishProfile resolved correctly."
     }
     $publishSize = (Get-ChildItem -Path $appFilesDir -Recurse |
         Measure-Object -Property Length -Sum).Sum / 1Mb
@@ -92,7 +92,7 @@ if (-Not (Test-Path $ghPagesDir)) {
 
 Push-Location $ghPagesDir
 try {
-    # Ensure all files are stored as binary — prevents git from normalizing line endings
+    # Ensure all files are stored as binary -- prevents git from normalizing line endings
     # in ClickOnce manifest XML files, which would break hash verification on install.
     if (-Not (Test-Path ".gitattributes") -or (Get-Content ".gitattributes" -Raw) -notmatch '\* -text') {
         Set-Content ".gitattributes" "* -text"
