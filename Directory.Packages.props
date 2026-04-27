@@ -5,7 +5,11 @@
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="FuzzySharp" Version="2.0.2" />
     <PackageVersion Include="HtmlAgilityPack" Version="1.11.72" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.7" />
+    <PackageVersion Include="WPF-UI" Version="4.2.1" />
   </ItemGroup>
 </Project>

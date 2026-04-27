@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
-namespace iTuneslyrics.Source
+namespace iTuneslyrics.Source.Services
 {
     public class SearchHit
     {
@@ -17,19 +17,9 @@ namespace iTuneslyrics.Source
         public string ArtistName { get; set; }
     }
 
-    public interface IGeniusService
-    {
-        Task<IReadOnlyList<SearchHit>> SearchAsync(string query);
-        Task<string> GetLyricsAsync(string url);
-    }
-
     public class GeniusService : IGeniusService
     {
         private const string SearchEndpoint = "https://api.genius.com/search";
-
-        private const string UserAgent =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-            "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
@@ -38,20 +28,12 @@ namespace iTuneslyrics.Source
         };
 
         private readonly HttpClient _httpClient;
+        private readonly IUserSettings _settings;
 
-        public GeniusService(string apiToken)
+        public GeniusService(HttpClient httpClient, IUserSettings settings)
         {
-            var handler = new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-            _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-            _httpClient.DefaultRequestHeaders.Accept.ParseAdd(
-                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-            _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiToken);
+            _httpClient = httpClient;
+            _settings = settings;
         }
 
         public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query)
@@ -59,10 +41,15 @@ namespace iTuneslyrics.Source
             try
             {
                 var url = $"{SearchEndpoint}?q={Uri.EscapeDataString(query)}";
-                var json = await _httpClient.GetStringAsync(url).ConfigureAwait(false);
-                var response = JsonSerializer.Deserialize<GeniusSearchResponse>(json, JsonOptions);
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _settings.GeniusApiToken ?? string.Empty);
+                using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var searchResponse = JsonSerializer.Deserialize<GeniusSearchResponse>(json, JsonOptions);
 
-                var hits = response?.Response?.Hits;
+                var hits = searchResponse?.Response?.Hits;
                 if (hits == null || hits.Count == 0)
                     return Array.Empty<SearchHit>();
 

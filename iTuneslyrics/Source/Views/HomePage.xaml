@@ -1,0 +1,84 @@
+<Page
+    x:Class="iTuneslyrics.Source.Views.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:iTuneslyrics.Source.ViewModels"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Error bar -->
+        <ui:InfoBar
+            Grid.Row="0"
+            IsOpen="{Binding ErrorMessage, Converter={StaticResource NullToFalseConverter}, FallbackValue=False}"
+            Severity="Error"
+            Title="Error"
+            Message="{Binding ErrorMessage}"
+            Margin="0,0,0,16"
+            IsClosable="False" />
+
+        <!-- Header -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,28">
+            <TextBlock
+                Text="Get Lyrics"
+                FontSize="22"
+                FontWeight="Medium" />
+            <TextBlock
+                Text="Fetch lyrics from Genius for selected iTunes tracks."
+                FontSize="13"
+                Opacity="0.45"
+                Margin="0,6,0,0" />
+        </StackPanel>
+
+        <!-- Options -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,28">
+            <CheckBox
+                Content="Update automatically"
+                IsChecked="{Binding IsAutoUpdate}"
+                Margin="0,0,0,10" />
+            <CheckBox
+                Content="Overwrite existing lyrics"
+                IsChecked="{Binding IsOverwrite}" />
+        </StackPanel>
+
+        <!-- Selection info card -->
+        <Border
+            Grid.Row="3"
+            Background="{DynamicResource ControlFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="16"
+            Margin="0,0,0,28">
+            <StackPanel>
+                <TextBlock
+                    Text="SELECTION"
+                    FontSize="11"
+                    FontWeight="Medium"
+                    Opacity="0.35"
+                    Margin="0,0,0,6" />
+                <TextBlock
+                    Text="{Binding TrackCount, StringFormat='{}{0} tracks'}"
+                    FontSize="14" />
+            </StackPanel>
+        </Border>
+
+        <!-- Get Lyrics button -->
+        <ui:Button
+            Grid.Row="5"
+            Content="Get Lyrics"
+            Appearance="Primary"
+            HorizontalAlignment="Stretch"
+            Command="{Binding GetLyricsCommand}"
+            IsEnabled="{Binding IsITunesAvailable}" />
+    </Grid>
+</Page>

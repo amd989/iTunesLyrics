@@ -1,0 +1,78 @@
+<Page
+    x:Class="iTuneslyrics.Source.Views.ResultsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:converters="clr-namespace:iTuneslyrics.Source.Converters"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <Page.Resources>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
+    </Page.Resources>
+
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Progress -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <Grid Margin="0,0,0,10">
+                <TextBlock
+                    Text="Processing"
+                    FontSize="13"
+                    Opacity="0.5"
+                    HorizontalAlignment="Left" />
+                <TextBlock
+                    HorizontalAlignment="Right"
+                    FontSize="12"
+                    Opacity="0.35">
+                    <Run Text="{Binding Progress, Mode=OneWay}" />
+                    <Run Text="of" />
+                    <Run Text="{Binding Total, Mode=OneWay}" />
+                </TextBlock>
+            </Grid>
+            <ProgressBar
+                Value="{Binding Progress, Mode=OneWay}"
+                Maximum="{Binding Total, Mode=OneWay}"
+                Height="2" />
+        </StackPanel>
+
+        <!-- Results grid -->
+        <DataGrid
+            Grid.Row="1"
+            ItemsSource="{Binding Tracks}"
+            AutoGenerateColumns="False"
+            IsReadOnly="True"
+            HeadersVisibility="Column"
+            GridLinesVisibility="Horizontal"
+            CanUserReorderColumns="False"
+            CanUserResizeRows="False"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Header="Track"
+                    Binding="{Binding Song}"
+                    Width="2*" />
+                <DataGridTextColumn
+                    Header="Artist"
+                    Binding="{Binding Artist}"
+                    Width="*" />
+                <DataGridTemplateColumn
+                    Header="Status"
+                    Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Text="{Binding Status}"
+                                Foreground="{Binding Status, Converter={StaticResource StatusToColorConverter}}"
+                                HorizontalAlignment="Right" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Page>
