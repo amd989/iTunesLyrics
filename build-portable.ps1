@@ -37,7 +37,8 @@ dotnet publish "$projDir/iTuneslyrics.csproj" `
     -c Release `
     -o "$publishDir" `
     -p:Version=$Version `
-    --self-contained false
+    -r win-x64 `
+    --self-contained true
 if ($LASTEXITCODE -ne 0) { Write-Error "Publish failed"; exit 1 }
 
 # Create ZIP

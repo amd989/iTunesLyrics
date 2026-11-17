@@ -41,7 +41,8 @@ if (Test-Path $outDir) {
 Push-Location $projDir
 try {
     Write-Output "Restoring:"
-    dotnet restore iTuneslyrics.csproj
+    # RID must match ClickOnceProfile.pubxml (self-contained win-x64), or publish fails with NETSDK1047.
+    dotnet restore iTuneslyrics.csproj -r win-x64
     Write-Output "Publishing:"
     $msBuildVerbosityArg = "/v:m"
     if ($env:CI) {
