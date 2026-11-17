@@ -51,7 +51,7 @@ namespace iTuneslyrics.Source.Services
                 {
                     var searchArtist = TitleNormalizer.NormalizeForQuery(artist);
                     var searchSong = TitleNormalizer.NormalizeForQuery(song);
-                    var hits = await _genius.SearchAsync(searchArtist + " " + searchSong);
+                    var hits = await _genius.SearchAsync(searchArtist + " " + searchSong, ct);
                     var hit = TitleNormalizer.PickBest(hits, artist, song);
 
                     if (hit == null)
@@ -60,7 +60,7 @@ namespace iTuneslyrics.Source.Services
                         continue;
                     }
 
-                    var lyrics = await _genius.GetLyricsAsync(hit.Url);
+                    var lyrics = await _genius.GetLyricsAsync(hit.Url, ct);
                     if (string.IsNullOrEmpty(lyrics))
                     {
                         progress.Report(new TrackProgress(track, song, artist, ResultStatus.NotFound));

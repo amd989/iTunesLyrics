@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using FuzzySharp;
+using iTuneslyrics.Source.Models;
 
 namespace iTuneslyrics.Source.Services
 {

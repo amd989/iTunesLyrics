@@ -18,6 +18,13 @@ namespace iTuneslyrics.Source.ViewModels
         [ObservableProperty]
         private string _configFilePath;
 
+        /// <summary>True when no token is saved. Drives the prompt shown when Home redirects here.</summary>
+        [ObservableProperty]
+        private bool _isTokenMissing;
+
+        [ObservableProperty]
+        private bool _isSaved;
+
         public SettingsViewModel(IUserSettings settings, MainViewModel mainViewModel)
         {
             _settings = settings;
@@ -25,14 +32,21 @@ namespace iTuneslyrics.Source.ViewModels
             _apiToken = settings.GeniusApiToken;
             _isAlwaysOnTop = settings.AlwaysOnTop;
             _configFilePath = settings.ConfigFilePath;
+            _isTokenMissing = string.IsNullOrWhiteSpace(_apiToken);
         }
 
         [RelayCommand]
         private void Save()
         {
-            _settings.GeniusApiToken = ApiToken?.Trim() ?? string.Empty;
-            _settings.AlwaysOnTop = IsAlwaysOnTop;
-            _mainViewModel.IsAlwaysOnTop = IsAlwaysOnTop;
+            var token = ApiToken?.Trim() ?? string.Empty;
+            _settings.GeniusApiToken = token;
+            IsTokenMissing = token.Length == 0;
+            IsSaved = !IsTokenMissing;
+        }
+
+        partial void OnApiTokenChanged(string value)
+        {
+            IsSaved = false;
         }
 
         partial void OnIsAlwaysOnTopChanged(bool value)

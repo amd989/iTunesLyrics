@@ -15,12 +15,26 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <TextBlock
-            Grid.Row="0"
-            Text="Settings"
-            FontSize="22"
-            FontWeight="Medium"
-            Margin="0,0,0,28" />
+        <StackPanel Grid.Row="0" Margin="0,0,0,28">
+            <TextBlock
+                Text="Settings"
+                FontSize="22"
+                FontWeight="Medium" />
+            <ui:InfoBar
+                IsOpen="{Binding IsTokenMissing}"
+                Severity="Warning"
+                Title="Genius API token required"
+                Message="Create a client at genius.com/api-clients, then paste its Client Access Token below."
+                IsClosable="False"
+                Margin="0,16,0,0" />
+            <ui:InfoBar
+                IsOpen="{Binding IsSaved}"
+                Severity="Success"
+                Title="Token saved"
+                Message="You can go back to Home and fetch lyrics."
+                IsClosable="False"
+                Margin="0,16,0,0" />
+        </StackPanel>
 
         <!-- API Token -->
         <StackPanel Grid.Row="1" Margin="0,0,0,20">

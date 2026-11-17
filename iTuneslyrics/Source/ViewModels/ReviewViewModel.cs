@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using iTunesLib;
@@ -15,7 +17,7 @@ namespace iTuneslyrics.Source.ViewModels
         private readonly IGeniusService _genius;
         private readonly IITunesService _itunes;
         private readonly MainViewModel _mainViewModel;
-        private IReadOnlyList<IITFileOrCDTrack> _tracks;
+        private IReadOnlyList<IITFileOrCDTrack> _tracks = Array.Empty<IITFileOrCDTrack>();
         private int _currentIndex;
         private CancellationTokenSource _loadCts;
 
@@ -29,7 +31,7 @@ namespace iTuneslyrics.Source.ViewModels
         private string _lyrics;
 
         [ObservableProperty]
-        private string _albumArtPath;
+        private ImageSource _albumArt;
 
         [ObservableProperty]
         private string _trackCounter;
@@ -56,7 +58,7 @@ namespace iTuneslyrics.Source.ViewModels
 
         private async void LoadCurrent()
         {
-            _loadCts?.Cancel();
+            CancelPendingLoad();
             _loadCts = new CancellationTokenSource();
             var ct = _loadCts.Token;
 
@@ -73,32 +75,20 @@ namespace iTuneslyrics.Source.ViewModels
             Lyrics = string.Empty;
             CanUpdate = false;
             IsLoading = true;
+            AlbumArt = LoadArtwork(track);
 
-            // Album art
-            try
-            {
-                var tempPath = Path.Combine(Path.GetTempPath(), "itunesart");
-                _itunes.SaveArtworkToFile(track, tempPath);
-                AlbumArtPath = File.Exists(tempPath) ? tempPath : null;
-            }
-            catch
-            {
-                AlbumArtPath = null;
-            }
-
-            // Fetch lyrics
             try
             {
                 var searchArtist = TitleNormalizer.NormalizeForQuery(Artist);
                 var searchSong = TitleNormalizer.NormalizeForQuery(Song);
-                var hits = await _genius.SearchAsync(searchArtist + " " + searchSong);
+                var hits = await _genius.SearchAsync(searchArtist + " " + searchSong, ct);
                 if (ct.IsCancellationRequested) return;
 
                 var match = TitleNormalizer.PickBest(hits, Artist, Song);
 
                 if (match != null)
                 {
-                    Lyrics = await _genius.GetLyricsAsync(match.Url);
+                    Lyrics = await _genius.GetLyricsAsync(match.Url, ct);
                     if (ct.IsCancellationRequested) return;
                     CanUpdate = !string.IsNullOrEmpty(Lyrics);
                 }
@@ -125,6 +115,54 @@ namespace iTuneslyrics.Source.ViewModels
             }
         }
 
+        /// <summary>
+        /// Exports the track's artwork to a unique temp file, decodes it fully into memory,
+        /// then deletes the file. Avoids WPF's URI image cache and leftover temp files.
+        /// </summary>
+        private ImageSource LoadArtwork(IITFileOrCDTrack track)
+        {
+            var path = Path.Combine(Path.GetTempPath(), $"itunesart_{Guid.NewGuid():N}");
+            try
+            {
+                _itunes.SaveArtworkToFile(track, path);
+                if (!File.Exists(path))
+                    return null;
+
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                bitmap.DecodePixelWidth = 128;
+                bitmap.UriSource = new Uri(path);
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+                catch
+                {
+                    // best effort
+                }
+            }
+        }
+
+        private void CancelPendingLoad()
+        {
+            _loadCts?.Cancel();
+            _loadCts?.Dispose();
+            _loadCts = null;
+        }
+
         [RelayCommand]
         private void Update()
         {
@@ -146,6 +184,8 @@ namespace iTuneslyrics.Source.ViewModels
         [RelayCommand]
         private void CancelAll()
         {
+            CancelPendingLoad();
+            _tracks = Array.Empty<IITFileOrCDTrack>();
             _mainViewModel.Navigate(typeof(HomePage));
         }
     }

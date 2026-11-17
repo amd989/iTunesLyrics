@@ -4,7 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    ScrollViewer.VerticalScrollBarVisibility="Disabled">
+    ScrollViewer.CanContentScroll="False">
+    <!-- False opts out of WPF-UI's page-level DynamicScrollViewer (see ResultsPage.xaml);
+         the lyrics TextBox scrolls on its own. -->
 
     <Grid Margin="32">
         <Grid.RowDefinitions>
@@ -29,7 +31,7 @@
                 BorderThickness="1"
                 Margin="0,0,16,0">
                 <Image
-                    Source="{Binding AlbumArtPath}"
+                    Source="{Binding AlbumArt}"
                     Stretch="UniformToFill" />
             </Border>
 

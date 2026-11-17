@@ -4,8 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:iTuneslyrics.Source.ViewModels"
-    Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ScrollViewer.CanContentScroll="False">
+    <!-- CanContentScroll=False opts out of WPF-UI's page scroller (see ResultsPage.xaml). The local
+         ScrollViewer only shows a bar on real overflow; MinHeight=ViewportHeight keeps the button
+         pinned to the bottom whenever the content fits. -->
 
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
     <Grid Margin="32">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -59,17 +65,30 @@
             CornerRadius="10"
             Padding="16"
             Margin="0,0,0,28">
-            <StackPanel>
-                <TextBlock
-                    Text="SELECTION"
-                    FontSize="11"
-                    FontWeight="Medium"
-                    Opacity="0.35"
-                    Margin="0,0,0,6" />
-                <TextBlock
-                    Text="{Binding TrackCount, StringFormat='{}{0} tracks'}"
-                    FontSize="14" />
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock
+                        Text="SELECTION"
+                        FontSize="11"
+                        FontWeight="Medium"
+                        Opacity="0.35"
+                        Margin="0,0,0,6" />
+                    <TextBlock
+                        Text="{Binding SelectionText}"
+                        FontSize="14" />
+                </StackPanel>
+                <ui:Button
+                    Grid.Column="1"
+                    Content="Refresh"
+                    Appearance="Secondary"
+                    VerticalAlignment="Center"
+                    Command="{Binding RefreshCommand}"
+                    ToolTip="Re-read the selected tracks from iTunes" />
+            </Grid>
         </Border>
 
         <!-- Get Lyrics button -->
@@ -78,7 +97,8 @@
             Content="Get Lyrics"
             Appearance="Primary"
             HorizontalAlignment="Stretch"
-            Command="{Binding GetLyricsCommand}"
-            IsEnabled="{Binding IsITunesAvailable}" />
+            Command="{Binding GetLyricsCommand}" />
     </Grid>
+    </Grid>
+    </ScrollViewer>
 </Page>

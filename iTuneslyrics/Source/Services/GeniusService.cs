@@ -5,18 +5,13 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using iTuneslyrics.Source.Models;
 
 namespace iTuneslyrics.Source.Services
 {
-    public class SearchHit
-    {
-        public string Title { get; set; }
-        public string Url { get; set; }
-        public string ArtistName { get; set; }
-    }
-
     public class GeniusService : IGeniusService
     {
         private const string SearchEndpoint = "https://api.genius.com/search";
@@ -36,17 +31,21 @@ namespace iTuneslyrics.Source.Services
             _settings = settings;
         }
 
-        public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query)
+        public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query, CancellationToken ct = default)
         {
             try
             {
+                var token = _settings.GeniusApiToken;
+                if (string.IsNullOrWhiteSpace(token))
+                    return Array.Empty<SearchHit>();
+
                 var url = $"{SearchEndpoint}?q={Uri.EscapeDataString(query)}";
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _settings.GeniusApiToken ?? string.Empty);
-                using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
                 var searchResponse = JsonSerializer.Deserialize<GeniusSearchResponse>(json, JsonOptions);
 
                 var hits = searchResponse?.Response?.Hits;
@@ -72,11 +71,11 @@ namespace iTuneslyrics.Source.Services
             }
         }
 
-        public async Task<string> GetLyricsAsync(string url)
+        public async Task<string> GetLyricsAsync(string url, CancellationToken ct = default)
         {
             try
             {
-                var source = await _httpClient.GetStringAsync(url).ConfigureAwait(false);
+                var source = await _httpClient.GetStringAsync(url, ct).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(source)) return string.Empty;
 
                 var html = new HtmlDocument();

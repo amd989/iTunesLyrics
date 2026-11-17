@@ -11,17 +11,14 @@ namespace iTuneslyrics.Source.ViewModels
         [ObservableProperty]
         private bool _isAlwaysOnTop;
 
-        public object PendingDataContext { get; set; }
-
         public MainViewModel(INavigationService navigationService, Services.IUserSettings settings)
         {
             _navigationService = navigationService;
             _isAlwaysOnTop = settings.AlwaysOnTop;
         }
 
-        public void Navigate(Type pageType, object dataContext = null)
+        public void Navigate(Type pageType)
         {
-            PendingDataContext = dataContext;
             _navigationService.Navigate(pageType);
         }
     }

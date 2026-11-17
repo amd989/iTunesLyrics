@@ -42,8 +42,9 @@ namespace iTuneslyrics.Source
             // ViewModels
             services.AddSingleton<MainViewModel>();
             services.AddTransient<HomeViewModel>();
-            services.AddTransient<ResultsViewModel>();
-            services.AddTransient<ReviewViewModel>();
+            // Singletons: a run or review queue must survive page navigation.
+            services.AddSingleton<ResultsViewModel>();
+            services.AddSingleton<ReviewViewModel>();
             services.AddTransient<SettingsViewModel>();
 
             // Views

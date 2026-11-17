@@ -6,9 +6,9 @@
     xmlns:views="clr-namespace:iTuneslyrics.Source.Views"
     Title="iTunes Lyrics"
     Width="720"
-    Height="520"
-    MinWidth="580"
-    MinHeight="420"
+    Height="440"
+    MinWidth="520"
+    MinHeight="440"
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="Mica"
     WindowStartupLocation="CenterScreen">
@@ -23,8 +23,10 @@
             x:Name="NavigationView"
             Grid.ColumnSpan="2"
             IsPaneToggleVisible="False"
+            IsPaneOpen="False"
             IsBackButtonVisible="Collapsed"
             PaneDisplayMode="Left"
+            CompactPaneLength="48"
             OpenPaneLength="160">
 
             <ui:NavigationView.Header>
@@ -34,15 +36,21 @@
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem
                     Content="Home"
+                    ToolTip="Home"
+                    Icon="{ui:SymbolIcon Home24}"
                     TargetPageType="{x:Type views:HomePage}" />
                 <ui:NavigationViewItem
                     Content="Results"
+                    ToolTip="Results"
+                    Icon="{ui:SymbolIcon TextBulletListLtr24}"
                     TargetPageType="{x:Type views:ResultsPage}" />
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem
                     Content="Settings"
+                    ToolTip="Settings"
+                    Icon="{ui:SymbolIcon Settings24}"
                     TargetPageType="{x:Type views:SettingsPage}" />
             </ui:NavigationView.FooterMenuItems>
 
