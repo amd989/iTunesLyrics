@@ -5,7 +5,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\iTunesHelper_APP_ICON.ico</ApplicationIcon>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <Version Condition="'$(Version)' == ''">1.4.0</Version>
+    <Version Condition="'$(Version)' == ''">1.5.0</Version>
     <AssemblyTitle>iTunes Lyrics Importer</AssemblyTitle>
     <Description>Import lyrics into iTunes from Genius.</Description>
     <Company>Alejandro Mora</Company>
@@ -38,7 +38,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
