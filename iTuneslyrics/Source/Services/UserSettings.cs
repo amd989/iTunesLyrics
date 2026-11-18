@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 
-namespace iTuneslyrics.Source
+namespace iTuneslyrics.Source.Services
 {
-    internal static class UserSettings
+    public class UserSettings : IUserSettings
     {
         private static string SettingsDir => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "iTunesLyrics");
 
-        public static string ConfigFilePath => Path.Combine(SettingsDir, "config.txt");
+        public string ConfigFilePath => Path.Combine(SettingsDir, "config.txt");
 
-        private static string AlwaysOnTopPath => Path.Combine(SettingsDir, "alwaysOnTop.txt");
+        private string AlwaysOnTopPath => Path.Combine(SettingsDir, "alwaysOnTop.txt");
 
-        public static string GeniusApiToken
+        public string GeniusApiToken
         {
             get
             {
@@ -35,7 +35,7 @@ namespace iTuneslyrics.Source
             }
         }
 
-        public static bool AlwaysOnTop
+        public bool AlwaysOnTop
         {
             get
             {

@@ -1,0 +1,127 @@
+<Page
+    x:Class="iTuneslyrics.Source.Views.ResultsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:converters="clr-namespace:iTuneslyrics.Source.Converters"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ScrollViewer.CanContentScroll="False">
+    <!-- WPF-UI's NavigationViewContentPresenter copies the page's CanContentScroll into
+         IsDynamicScrollViewerEnabled on navigation (Pages default to True). False opts out of the
+         page-level scroller, so the page gets the window height and only the DataGrid scrolls. -->
+
+    <Page.Resources>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
+    </Page.Resources>
+
+    <Grid Margin="32">
+        <!-- Empty state -->
+        <StackPanel
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}">
+            <TextBlock
+                Text="No results yet"
+                FontSize="17"
+                FontWeight="Medium"
+                HorizontalAlignment="Center" />
+            <TextBlock
+                Text="Start an automatic update from Home."
+                FontSize="13"
+                Opacity="0.45"
+                Margin="0,6,0,0"
+                HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <Grid Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Progress -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Text="{Binding StatusText}"
+                        FontSize="13"
+                        Opacity="0.5"
+                        VerticalAlignment="Center"
+                        TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                        Grid.Column="1"
+                        FontSize="12"
+                        Opacity="0.35"
+                        VerticalAlignment="Center">
+                        <Run Text="{Binding Progress, Mode=OneWay}" />
+                        <Run Text="of" />
+                        <Run Text="{Binding Total, Mode=OneWay}" />
+                    </TextBlock>
+                    <ui:Button
+                        Grid.Column="2"
+                        Content="Cancel"
+                        Appearance="Secondary"
+                        Command="{Binding CancelCommand}"
+                        Margin="12,0,0,0"
+                        Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </Grid>
+                <ProgressBar
+                    Value="{Binding Progress, Mode=OneWay}"
+                    Maximum="{Binding Total, Mode=OneWay}"
+                    Height="2" />
+            </StackPanel>
+
+            <!-- Results grid -->
+            <DataGrid
+                x:Name="ResultsGrid"
+                Grid.Row="1"
+                ItemsSource="{Binding Tracks}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                HeadersVisibility="Column"
+                GridLinesVisibility="Horizontal"
+                CanUserReorderColumns="False"
+                CanUserResizeRows="False"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Header="Track"
+                        Binding="{Binding Song}"
+                        Width="2*" />
+                    <DataGridTextColumn
+                        Header="Artist"
+                        Binding="{Binding Artist}"
+                        Width="*" />
+                    <DataGridTemplateColumn
+                        Header="Status"
+                        Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Text="{Binding Status}"
+                                    Foreground="{Binding Status, Converter={StaticResource StatusToColorConverter}}"
+                                    HorizontalAlignment="Right">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Status}" Value="Processing">
+                                                    <Setter Property="FontStyle" Value="Italic" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Page>

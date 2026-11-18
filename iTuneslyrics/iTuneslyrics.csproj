@@ -2,10 +2,10 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\iTunesHelper_APP_ICON.ico</ApplicationIcon>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <Version Condition="'$(Version)' == ''">1.4.0</Version>
+    <Version Condition="'$(Version)' == ''">1.5.0</Version>
     <AssemblyTitle>iTunes Lyrics Importer</AssemblyTitle>
     <Description>Import lyrics into iTunes from Genius.</Description>
     <Company>Alejandro Mora</Company>
@@ -38,7 +38,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -57,6 +57,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ApplicationDefinition Include="Source\App.xaml" />
+    <Page Remove="Source\App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Pre-generated COM interop for iTunes. Regenerate on a machine with iTunes:
          tlbimp "C:\Program Files\iTunes\iTunes.exe" /out:lib\Interop.iTunesLib.dll /namespace:iTunesLib
          Then commit the updated DLL. CI builds use this pre-generated DLL. -->
@@ -69,11 +74,14 @@
 
   <ItemGroup>
     <Content Include="Resources\iTunesHelper_APP_ICON.ico" />
-    <Content Include="Resources\settings.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="FuzzySharp" />
     <PackageReference Include="HtmlAgilityPack" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="WPF-UI" />
   </ItemGroup>
 </Project>
